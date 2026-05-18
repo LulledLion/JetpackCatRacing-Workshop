@@ -7,9 +7,31 @@ X The inspector is turned on/off in the same server tick. in gpk it was multiple
 X I see what button to save changes for move cp, but not what to press to cancel
     - if its missing, then it should be added before release.
 X Bug: go in editor mode > move checkpoint > isntead of save, turn of editor mode > ring bugs out and moves with you and half moves the checkpoint when playing
-- We need to add basic export instructions for how to paste and what to do with it.
+X We need to add basic export instructions for how to paste and what to do with it.
 X the editor bugs out if you delete checkpoint 0, can't even insert new ones
 X Placing first cp it says inserted, then goes into move mode, but the move mode moves the first cp not the start position.
+
+X it says "press" to make first checkpoint, but you actually have to hold. (my bad)
+X export should work in any mode, u can make it a 3 button press to make it less likely to conflict. also the command should show in all modes when its possible to do so.
+X While in editor mode on, reset command does nothing because you are locked and full reset brings you back to cp 0 but also starts the race etc.
+    Its probly better to disable both commands in editor on mode and hide them from the command list.
+X in my opinion, export could be inside a hud header to make it easier to read then white text that is often on a bright background
+X Mode name could also be color coded and have an icon in the hud to make it more clear. Like green for add, blue for move and red for delete etc with workshop icon next to the curent name.
+X the camera jitters while moving fast > set cam speed to both editor camera lower to be smoother, i think 25 might be ok.
+X currently, opening the editor triggers the "Checkpoint Selection Enabled" message, and the disable move mode message appears on closing it.- 
+    I don't think this message should trigger unless you actually went inside movement mode and back.
+X Currently it is pretty easy to accidentally delete a checkpoint. If you press arrow once ot much, you might be in wrong mode.
+    It could be mitigated by changing to a different binding then commmonly used melee.
+    [did this one ->] Or it could be made so that you have to hold for 0.5 sec when you delete something.
+
+- opening editor mode should pause timer until closed
+
+
+
+
+
+
+
 
 
 SHOULD:

@@ -34,7 +34,9 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 
 rule "Reset - Single Checkpoint":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)     
+	@Condition not hostPlayer.WsEditorOn
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+
     waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
     if eventPlayer.isHoldingButton(Button.RELOAD):
         return
@@ -61,7 +63,9 @@ def FullReset():
 
 rule "Reset - Full":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD) 
+	@Condition not hostPlayer.WsEditorOn
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+
     wait(0.5, Wait.ABORT_WHEN_FALSE)
     FullReset()
 
