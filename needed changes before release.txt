@@ -23,8 +23,7 @@ X currently, opening the editor triggers the "Checkpoint Selection Enabled" mess
 X Currently it is pretty easy to accidentally delete a checkpoint. If you press arrow once ot much, you might be in wrong mode.
     It could be mitigated by changing to a different binding then commmonly used melee.
     [did this one ->] Or it could be made so that you have to hold for 0.5 sec when you delete something.
-
-- opening editor mode should pause timer until closed
+X opening editor mode should pause timer until closed
 
 
 

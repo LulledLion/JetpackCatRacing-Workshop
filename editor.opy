@@ -30,21 +30,24 @@ rule "Editor | Enable Checkpoint Selection":
 
 	eventPlayer.CurrentEditorMode = EEditorMode.MOVE if eventPlayer.CurrentEditorMode == EEditorMode.OFF else EEditorMode.OFF
 
-	# Start the camera 
+	# Entering edit mode: Start the camera and stop the timer 
     if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
         StartEditorCamera()
+		stopChasingVariable(eventPlayer.Timer)
         wait(0.1)
-		# smallMessage(hostPlayer, "   Checkpoint Selection Enabled")
 		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-	# Stop the camera
+		# stop timer
+	# Exiting edit mode: Stop the camera and continue the timer
     else:
-        # smallMessage(hostPlayer, "   Checkpoint Selection Disabled")
 		eventPlayer.ActivelyEditing = false
 		destroyEffect(eventPlayer.EditCheckpointEffect)
-		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
         StopEditorCamera()
 		eventPlayer.IsMovingCheckpoint = false
-
+		# start timer
+		if len(Checkpoints) > 1:
+			chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
+		wait(0.1)
+		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
 
 
 rule "Editor | Export Data":
@@ -100,7 +103,6 @@ rule "Editor | Select Checkpoint & Mode":
 	
 	if eventPlayer.EditMeleeButtonPressed:
 		return
-
 
     if eventPlayer.getThrottle().z > 0.5:
         eventPlayer.CurrentCheckpointIdx += 1

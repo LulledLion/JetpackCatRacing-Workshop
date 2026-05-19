@@ -34,7 +34,8 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 
 rule "Reset - Single Checkpoint":
     @Event eachPlayer
-	@Condition not hostPlayer.WsEditorOn
+	# @Condition not hostPlayer.WsEditorOn
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
 
     waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
@@ -53,9 +54,9 @@ def FullReset():
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
     ResetSpeed()
 
-    waitUntil(eventPlayer.isMoving() and not eventPlayer.CurrentEditorMode, 99999)
+    waitUntil(eventPlayer.isMoving() and eventPlayer.CurrentEditorMode == EEditorMode.OFF, 99999)
 
-	if len(Checkpoints) > 0:
+	if len(Checkpoints) > 1:
 		chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
     
 	eventPlayer.IsRacing = true
@@ -63,7 +64,8 @@ def FullReset():
 
 rule "Reset - Full":
     @Event eachPlayer
-	@Condition not hostPlayer.WsEditorOn
+	# @Condition not hostPlayer.WsEditorOn
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
 
     wait(0.5, Wait.ABORT_WHEN_FALSE)

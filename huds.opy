@@ -16,7 +16,7 @@ rule "HUD Setup":
         f"Discord: dsc.gg/jetpack{LeftAlign100}",
         HudPosition.LEFT, EHudOrder.DISC, ColorConfig[ECustomize.DSC], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
-    hudSubtext(getAllPlayers() if not hostPlayer.WsEditorOn else null, 
+    hudSubtext(getAllPlayers() if localPlayer.CurrentEditorMode == EEditorMode.OFF else null, 
         "Press [{0}]: reset\n"
         "Hold [{0}]: full restart\n"
         "".format(
@@ -175,7 +175,7 @@ rule "Editor HUD":
 
 	# move fast/slow in move mode
     hudSubtext(
-        hostPlayer if hostPlayer.WsEditorOn and hostPlayer.CurrentEditorMode == EEditorMode.MOVE else null, 
+        hostPlayer if hostPlayer.WsEditorOn and hostPlayer.CurrentEditorMode == EEditorMode.MOVE and hostPlayer.ActivelyEditing else null, 
         f"Hold [{inputBindingString(Button.PRIMARY_FIRE)}]: Move fast\nHold [{inputBindingString(Button.SECONDARY_FIRE)}]: Move slow",
         HudPosition.RIGHT, EHudOrder.CONTROLS + 10, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
