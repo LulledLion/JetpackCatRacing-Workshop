@@ -33,10 +33,10 @@ rule "Editor | Enable Checkpoint Selection":
 	# Entering edit mode: Start the camera and stop the timer 
     if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
         StartEditorCamera()
+		# stop timer
 		stopChasingVariable(eventPlayer.Timer)
         wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-		# stop timer
 	# Exiting edit mode: Stop the camera and continue the timer
     else:
 		eventPlayer.ActivelyEditing = false

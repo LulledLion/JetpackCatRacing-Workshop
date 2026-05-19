@@ -12,7 +12,8 @@ globalvar ColorConfig 22
 globalvar GoalText 23
 
 # Workshop Settings
-# globalvar wsEditorMode 50
+globalvar RestartLobbyTime 50
+globalvar InfiniteLobbyTime 51
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
