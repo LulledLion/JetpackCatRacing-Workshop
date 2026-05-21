@@ -4,7 +4,7 @@
 
 settings {
     "main": {
-        "description": "Jetpack Cat Racing Overhaul.\nAdapted by nebula\noriginal credit to Jashaal and Roeesun.",
+        "description": "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer.\nAdapted by nebula\nOriginal credit to Jashaal and Roeesun.\n\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing",
         "modeName": f"Jetpack Cat Racing {VERSION}"
     },
     "lobby": {
@@ -19,7 +19,6 @@ settings {
     "gamemodes": {
         "skirmish": {
             "enabledMaps": [
-
                 "hanamura"
             ]
 

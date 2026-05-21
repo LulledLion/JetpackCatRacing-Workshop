@@ -12,6 +12,41 @@ rule "Init Global":
     LeaderboardText = null
     LeaderboardEntries = []
     LeaderboardRemake = false
+
+	# Editor variable
+	ModeName = [
+		"Editor Off",
+		"Editor On",
+		"{0} Move Mode".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)),
+		"{0} Insert Mode".format(iconString(Icon.HALO)),
+		"{0} Remove Mode".format(iconString(Icon.TRASHCAN))
+	]
+
+	ModeColour = [
+		Color.WHITE,
+		Color.WHITE,
+		Color.BLUE,
+		Color.GREEN,
+		Color.RED
+	]
+
+	ModeAltColour = [
+		Color.WHITE,
+		Color.WHITE,
+		Color.SKY_BLUE,
+		Color.LIME_GREEN,
+		Color.ROSE
+	]
+
+	ModeActionText = [
+		"",
+		"",
+		"Move:",
+		"Insert:",
+		"Remove: Hold"
+	]
+
+
     setMatchTime(900)
 
     wait(ELoadOrder.SETUP)

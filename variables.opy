@@ -20,6 +20,12 @@ globalvar LeaderboardText 60 # txt entities
 globalvar LeaderboardEntries 61 # # [ [name, time] ]
 globalvar LeaderboardRemake 62 # trigger remake leaderboard
 
+# Editor related
+globalvar ModeName 63
+globalvar ModeColour 64
+globalvar ModeAltColour 65
+globalvar ModeActionText 66
+
 # Plugins
 globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
@@ -84,6 +90,13 @@ enum ELoadOrder:
 enum EHudOrder: # hud ordering
     # hud middle ###############
     TIMER,
+	EDITOR_MODE_TEXT,
+	NEXT_CP_TEXT,
+	NEXT_PREV_MODE_TEXT,
+	FIRST_CP_TEXT,
+	MODE_ACTION_TEXT,
+	PREV_CP_TEXT,
+	EXPORT_INFO_TEXT,
 
     MIDLE_END, 
     # hud left ###############

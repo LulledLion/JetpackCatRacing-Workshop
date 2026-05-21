@@ -10,7 +10,6 @@ X Bug: go in editor mode > move checkpoint > isntead of save, turn of editor mod
 X We need to add basic export instructions for how to paste and what to do with it.
 X the editor bugs out if you delete checkpoint 0, can't even insert new ones
 X Placing first cp it says inserted, then goes into move mode, but the move mode moves the first cp not the start position.
-
 X it says "press" to make first checkpoint, but you actually have to hold. (my bad)
 X export should work in any mode, u can make it a 3 button press to make it less likely to conflict. also the command should show in all modes when its possible to do so.
 X While in editor mode on, reset command does nothing because you are locked and full reset brings you back to cp 0 but also starts the race etc.

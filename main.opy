@@ -2,7 +2,7 @@
 #!optimizeStrict
 
 # settings ###################
-#!define VERSION "0.1.1"    
+#!define VERSION "1.0.0"    
 
 #!define EDITOR_ON true
 #!define INSPECTOR_ON true
