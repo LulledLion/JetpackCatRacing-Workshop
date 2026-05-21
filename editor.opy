@@ -64,18 +64,18 @@ rule "Editor | Export Data":
 	smallMessage(eventPlayer, "   Map Data Exporting...")
 	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
 	eventPlayer.ShouldShowExportInstructions = true
-	wait(0.5)
     LeaderboardText = null
     LeaderboardEntries = null
     LeaderboardRemake = null
     ColorConfig = null
 	CreatorName = null
 	MapCode = null
-	wait(2)
+	RestartLobbyTime = null
+	InfiniteLobbyTime = null
+	wait(1)
     disableInspector()
     smallMessage(eventPlayer, "   Map Data Exported - Check Inspector")
 	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
-	
 
 
 rule "Editor | Hide Export instruction":

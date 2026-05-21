@@ -17,10 +17,10 @@ rule "HUD Setup":
         HudPosition.LEFT, EHudOrder.DISC, ColorConfig[ECustomize.DSC], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
     hudSubtext(getAllPlayers() if localPlayer.CurrentEditorMode == EEditorMode.OFF else null, 
-        "Press [{0}]: {1} Quick reset\n"
-        "Hold [{0}]: {2} full restart\n"
+        "Press [{0}]: Quick reset\n"
+        "Hold [{0}]: full restart\n"
         "".format(
-        	inputBindingString(Button.RELOAD), iconString(Icon.RECYCLE), iconString(Icon.TRASHCAN)
+        	inputBindingString(Button.RELOAD)
         ), 
         HudPosition.RIGHT, EHudOrder.CONTROLS, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
@@ -95,10 +95,10 @@ rule "Editor HUD":
 	# Current mode Top HUD
     hudHeader(
         hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-		" {} ".format(ModeName[localPlayer.CurrentEditorMode]),
+		" {0} Move Mode ".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)) if localPlayer.CurrentEditorMode == EEditorMode.MOVE else " {0} Insert Mode ".format(iconString(Icon.HALO)) if localPlayer.CurrentEditorMode == EEditorMode.INSERT else " {0} Remove Mode ".format(iconString(Icon.TRASHCAN)),
         HudPosition.TOP, 
         EHudOrder.EDITOR_MODE_TEXT, 
-		ModeColour[localPlayer.CurrentEditorMode],
+		Color.BLUE if localPlayer.CurrentEditorMode == EEditorMode.MOVE else Color.GREEN if localPlayer.CurrentEditorMode == EEditorMode.INSERT else Color.RED,
         HudReeval.VISIBILITY_STRING_AND_COLOR, 
         SpecVisibility.NEVER
     )
@@ -117,7 +117,7 @@ rule "Editor HUD":
 	# Previous/Next mode button
     hudSubtext(
         hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-        f"\n\n\n\n\n\n\n\n\n{iconString(Icon.ARROW_LEFT)} {ModeName[localPlayer.CurrentEditorMode + 1 if localPlayer.CurrentEditorMode < len(EEditorMode) - 1 else EEditorMode.MOVE]}                                                                             {ModeName[localPlayer.CurrentEditorMode - 1 if localPlayer.CurrentEditorMode > EEditorMode.MOVE else len(EEditorMode) - 1]} {iconString(Icon.ARROW_RIGHT)}",
+        f"\n\n\n\n\n\n\n\n{iconString(Icon.ARROW_LEFT)} {'Move Mode' if (localPlayer.CurrentEditorMode + 1 if localPlayer.CurrentEditorMode < len(EEditorMode) - 1 else 2) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.CurrentEditorMode + 1 if localPlayer.CurrentEditorMode < len(EEditorMode) - 1 else 2) == EEditorMode.INSERT else 'Remove Mode'}                                                                             {'Move Mode' if (localPlayer.CurrentEditorMode - 1 if localPlayer.CurrentEditorMode > 2 else len(EEditorMode) - 1) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.CurrentEditorMode - 1 if localPlayer.CurrentEditorMode > 2 else len(EEditorMode) - 1) == EEditorMode.INSERT else 'Remove Mode'} {iconString(Icon.ARROW_RIGHT)}",
         HudPosition.TOP, 
         EHudOrder.NEXT_PREV_MODE_TEXT, 
         Color.WHITE, 
@@ -149,10 +149,10 @@ rule "Editor HUD":
 	# Save buttons (Melee)
     hudSubtext(
         hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-        f"\n\n\n\n\nSave: [{inputBindingString(Button.MELEE)}]                                                                    Cancel Move: [{inputBindingString(Button.INTERACT)}]" if localPlayer.CurrentEditorMode == EEditorMode.MOVE and localPlayer.ActivelyEditing else f"\n\n\n\n\n                                                                              {ModeActionText[localPlayer.CurrentEditorMode]} [{inputBindingString(Button.MELEE)}]",
-        HudPosition.TOP,
+		f"\n\n\n\nSave: [{inputBindingString(Button.MELEE)}]                                                                    Cancel Move: [{inputBindingString(Button.INTERACT)}]" if localPlayer.CurrentEditorMode == EEditorMode.MOVE and localPlayer.ActivelyEditing else f"\n\n\n\n                                                                              Move: [{inputBindingString(Button.MELEE)}]" if localPlayer.CurrentEditorMode == EEditorMode.MOVE else f"\n\n\n\n                                                                              Insert: [{inputBindingString(Button.MELEE)}]" if localPlayer.CurrentEditorMode == EEditorMode.INSERT else f"\n\n\n\n                                                                              Remove: Hold [{inputBindingString(Button.MELEE)}]",
+		HudPosition.TOP,
         EHudOrder.MODE_ACTION_TEXT,
-		ModeAltColour[localPlayer.CurrentEditorMode],
+		Color.SKY_BLUE if localPlayer.CurrentEditorMode == EEditorMode.MOVE else Color.LIME_GREEN if localPlayer.CurrentEditorMode == EEditorMode.INSERT else Color.ROSE,
         HudReeval.VISIBILITY_STRING_AND_COLOR,
         SpecVisibility.NEVER
     )

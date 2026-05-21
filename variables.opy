@@ -20,12 +20,6 @@ globalvar LeaderboardText 60 # txt entities
 globalvar LeaderboardEntries 61 # # [ [name, time] ]
 globalvar LeaderboardRemake 62 # trigger remake leaderboard
 
-# Editor related
-globalvar ModeName 63
-globalvar ModeColour 64
-globalvar ModeAltColour 65
-globalvar ModeActionText 66
-
 # Plugins
 globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126

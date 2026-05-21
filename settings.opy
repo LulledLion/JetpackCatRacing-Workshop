@@ -18,11 +18,9 @@ settings {
     },
     "gamemodes": {
         "skirmish": {
-            "enabledMaps": [
-                "hanamura"
-            ]
-
         },
+		"tdm": {
+		},
         "general": {
             "heroLimit": "off",
             "respawnTime%": 10,
