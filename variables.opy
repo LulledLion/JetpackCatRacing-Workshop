@@ -125,7 +125,7 @@ enum EEditorMode:
 
 macro Array.insertAt(index, item):
     self.append(null)
-    self = [CAE if CAI <= index else self[CAI - 1] for CAE, CAI in self]
+    self = self.map(lambda CAE, CAI: CAE if CAI <= index else self[CAI - 1])
     self[index] = item
 
 macro Player.flyMovementDelta():

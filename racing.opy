@@ -120,14 +120,13 @@ rule "Finish":
     ):
         bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.Timer, eventPlayer))
 
-    
-    if "{0}".format(eventPlayer) in [i[0] for i in LeaderboardEntries]: # you already have a time
-        if eventPlayer.Timer > [i for i in LeaderboardEntries if i[0] == "{0}".format(eventPlayer)][0][1]: # new time worse
+    if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]): # you already have a time
+        if eventPlayer.Timer > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: # new time worse
             bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.Timer))
             goto lbl_a
         else: # new time better
             bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.Timer))
-            LeaderboardEntries.remove( [i for i in LeaderboardEntries if i[0] == "{0}".format(eventPlayer)])
+            LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
             LeaderboardEntries.append( [["{0}".format(eventPlayer),eventPlayer.Timer]] )
             eventPlayer.PersonalBest = eventPlayer.Timer
             LeaderboardUpdate()
