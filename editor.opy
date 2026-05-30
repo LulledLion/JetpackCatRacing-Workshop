@@ -242,11 +242,12 @@ rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to t
 	eventPlayer.EditMeleeButtonPressed = false
 
 
-#!define cam_distance 8
+macro cam_distance = 8
 # calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
 # if nothing is hit then it just returns max length
 # parameter is the start position
-#!define cam_dist_calc(start) (distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1)
+macro cam_dist_calc(start):
+    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1
 
 def StartEditorCamera():
     @Name "Editor | Start Editor 3rd Person Camera"

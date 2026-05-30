@@ -154,17 +154,9 @@ def LeaderboardUpdate():
 
 
  
-# decrease to make it wait more often if you have load problems, keep at full int numbers no floats
-#!define fence_delay 3
-# projectile size, 30 is maximum possible atm
-#!define fence_proj_size 30
-# gridsize of 16 means a 16x16 grid with the point in the center
-#!define fence_grid 16
-# calculation to find the side of the map
-#!define fence_offset vect((fence_grid * fence_proj_size) / 2, 0, (fence_grid * fence_proj_size) / 2)
-# calculation for next explosion
-#!define fence_position  MapVectorArray[1] - fence_offset + (MapVectorArray[0] % fence_grid) * (Vector.LEFT * fence_proj_size) + floor(MapVectorArray[0] / fence_grid) * (Vector.FORWARD * fence_proj_size)
-
+macro fence_delay = 3 # decrease to make it wait more often if you have load problems, keep at full int numbers no floats
+macro fence_proj_size = 30 # projectile size, 30 is maximum possible atm
+macro fence_grid = 16 # gridsize of 16 means a 16x16 grid with the point in the center
 rule "Addon | Little Destructo - Fence Breaker":
     # Made by FishoFire version 1.0
     # wait to overwrite any from copy pastas

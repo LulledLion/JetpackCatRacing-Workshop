@@ -60,22 +60,23 @@ rule "test huds":
 
 
 # turns bots on/off completly
-#!define bots_on true
+macro bots_on = true
 
-#!define testbot_number 10
-#!define test_team Team.2
+macro = testbot_number = 10
+macro test_team = Team.2
 
 # test leaderboard (doesnt triger if action is on)
-#!define leaderboard_test true
-#!define leaderboard_delay 0.5
+macro leaderboard_test = true
+macro leaderboard_delay = 0.5
 
 # test other set actions (doesnt leaderboard if action is on)
-#!define other_action false
-#!define action_delay 0.4
+macro other_action = false
+macro action_delay = 0.4
 
 # This define puts the time between each bots action, perfectly spacing their actions out
 # delay_per_bot(0.5) means that first bot will wait 0, second bot will wait 0.5, third bot will wait 1 seconds etc
-#!define delay_per_bot(x) wait( ((TestBotArray.index(eventPlayer)) * x ) )
+macro delay_per_bot(x):
+    wait(TestBotArray.index(eventPlayer) * x)
 
 rule "bots: create test bots":
     @Condition bots_on

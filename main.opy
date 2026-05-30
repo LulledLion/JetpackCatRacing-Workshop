@@ -2,14 +2,9 @@
 #!optimizeStrict
 
 # settings ###################
-#!define VERSION "1.0.0"    
-
-#!define EDITOR_ON true
-#!define INSPECTOR_ON false
-
-# testscripts disable: ##, enable: #
-#!define test_script ##
-
+macro VERSION = "1.0.0"
+macro EDITOR_ON = true
+macro INSPECTOR_ON = false
 
 # includes ###################
 #!include "settings.opy"
