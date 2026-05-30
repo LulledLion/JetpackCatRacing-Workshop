@@ -1,6 +1,6 @@
 
 #!optimizeStrict
-
+##!writeToOutputFile
 # settings ###################
 macro VERSION = "1.0.0"
 macro EDITOR_ON = true
