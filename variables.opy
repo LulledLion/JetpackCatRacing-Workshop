@@ -55,6 +55,13 @@ subroutine EnableAbilities
 subroutine SetCheckpoints
 subroutine LeaderboardUpdate
 
+# testscripts disable: ##, enable: #
+#!define test_script ##
+
+#!define divider(x) rule "------------------------------------------------------------------------  x ------------------------------------------------------------------------ ":\
+    @Delimiter\
+    @Disabled
+
 #!define LeftAlign100 "                                                                                                    "
 
 enum ECustomize: # index in the customize array for colors and such
