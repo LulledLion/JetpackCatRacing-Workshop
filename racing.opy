@@ -1,14 +1,5 @@
 #!mainFile "main.opy"
 
-rule "Anti Crash":
-	@Event global
-	@Condition getServerLoad() > 250
-    wait(1, Wait.ABORT_WHEN_FALSE)
-    smallMessage(getAllPlayers(), "anti-crash system activated")
-    setSlowMotion(10)
-    waitUntil(getServerLoad() < 230, Math.INFINITY)
-    setSlowMotion(100)
-
 def SetCheckpoints():
     eventPlayer.CurrentCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx] 
     eventPlayer.GoalCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 1]
@@ -17,6 +8,8 @@ def SetCheckpoints():
 def ResetSpeed():
     eventPlayer.setMoveSpeed(100)
     eventPlayer.SpeedMultiplier = 100
+
+
 
 def GoToResetPoint(): # go to CurrentCheckpoint
 
@@ -32,18 +25,15 @@ def GoToResetPoint(): # go to CurrentCheckpoint
         eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.GoalCheckpoint), Relativity.TO_WORLD)
     eventPlayer.stopForcingPosition()
 
-rule "Reset - Single Checkpoint":
-    @Event eachPlayer
-	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
 
-    waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
-    if eventPlayer.isHoldingButton(Button.RELOAD):
-        return
 
-    GoToResetPoint()
-    ResetSpeed()
+def LeaderboardUpdate():
+    # this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left.
+    LeaderboardRemake = true
+    wait(0)
+    LeaderboardRemake = false # set false again to prevent board locking
+
+
 
 def FullReset():
     stopChasingVariable(eventPlayer.Timer)
@@ -61,38 +51,6 @@ def FullReset():
     
 	eventPlayer.IsRacing = true
     
-
-rule "Reset - Full":
-    @Event eachPlayer
-	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
-
-    wait(0.5, Wait.ABORT_WHEN_FALSE)
-    FullReset()
-
-rule "Handle Death":
-    @Event playerDied
-    eventPlayer.respawn()
-    GoToResetPoint()
-    ResetSpeed()
-
-
-rule "Arrive at Checkpoint":
-    @Event eachPlayer
-	@Condition eventPlayer.GoalCheckpoint != null
-    @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
-    @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition len(Checkpoints) > 1
-    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
-    playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
-    
-    eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
-    eventPlayer.SpeedMultiplier += 3
-
-    eventPlayer.CurrentCheckpointIdx += 1
-    SetCheckpoints()
 
 rule "Finish":
     @Event eachPlayer
@@ -145,11 +103,57 @@ rule "Finish":
                 LeaderboardUpdate()
     lbl_a:
 
-def LeaderboardUpdate():
-    # this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left.
-    LeaderboardRemake = true
-    wait(0.1)
-    LeaderboardRemake = false # set false again to prevent board locking
+
+
+rule "Arrive at Checkpoint":
+    @Event eachPlayer
+	@Condition eventPlayer.GoalCheckpoint != null
+    @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
+    @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
+    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition len(Checkpoints) > 1
+    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
+    playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
+    
+    eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
+    eventPlayer.SpeedMultiplier += 3
+
+    eventPlayer.CurrentCheckpointIdx += 1
+    SetCheckpoints()
+
+
+
+rule "Reset - Single Checkpoint":
+    @Event eachPlayer
+	# @Condition not hostPlayer.WsEditorOn
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+
+    waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
+    if eventPlayer.isHoldingButton(Button.RELOAD):
+        return
+
+    GoToResetPoint()
+    ResetSpeed()
+
+
+
+rule "Reset - Full":
+    @Event eachPlayer
+	# @Condition not hostPlayer.WsEditorOn
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+
+    wait(0.5, Wait.ABORT_WHEN_FALSE)
+    FullReset()
+
+
+
+rule "Handle Death":
+    @Event playerDied
+    eventPlayer.respawn()
+    GoToResetPoint()
+    ResetSpeed()
 
 
 
@@ -203,6 +207,8 @@ rule "Addon | Little Destructo - Fence Breaker":
         wait(0)
     MapVectorArray = null
 
+
+
 rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
 	@Condition not hostPlayer.WsEditorOn
 	@Condition not createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1)
@@ -212,3 +218,15 @@ rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
 	bigMessage(getAllPlayers(), "   {0} Lobby is restarting now...".format(iconString(Icon.WARNING)))
 	wait(3)
 	restartMatch()
+
+
+
+
+rule "Anti Crash":
+	@Event global
+	@Condition getServerLoad() > 250
+    wait(1, Wait.ABORT_WHEN_FALSE)
+    smallMessage(getAllPlayers(), "anti-crash system activated")
+    setSlowMotion(10)
+    waitUntil(getServerLoad() < 230, Math.INFINITY)
+    setSlowMotion(100)
