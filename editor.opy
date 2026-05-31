@@ -70,7 +70,7 @@ rule "Editor | Export Data":
 	CreatorName = null
 	MapCode = null
 	RestartLobbyTime = null
-	InfiniteLobbyTime = null
+	# InfiniteLobbyTime = null #$$ Remove
     enableInspector()
     disableInspector()
     smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")

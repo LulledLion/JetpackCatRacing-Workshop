@@ -195,8 +195,7 @@ rule "Addon | Little Destructo - Fence Breaker":
 
 rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
 	@Condition not hostPlayer.WsEditorOn
-	@Condition not createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1)
-	@Condition getTotalTimeElapsed() > (createWorkshopSettingInt("Lobby Setting", "Restart lobby after X minutes", 15, 1, 60, 0) - 1) * 60
+	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
     bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
     wait(60)
 	bigMessage(getAllPlayers(), "   {0} Lobby is restarting now...".format(iconString(Icon.WARNING)))

@@ -13,7 +13,7 @@ globalvar GoalText 23
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
-globalvar InfiniteLobbyTime 51
+# globalvar InfiniteLobbyTime 51 #$$ Remove
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
