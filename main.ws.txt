@@ -65,7 +65,6 @@ variables {
         22: ColorConfig
         23: GoalText
         50: RestartLobbyTime
-        51: InfiniteLobbyTime
         60: LeaderboardText
         61: LeaderboardEntries
         62: LeaderboardRemake
@@ -265,6 +264,7 @@ rule ("Init Global") {
         Disable Built-In Game Mode Completion;
         Disable Built-In Game Mode Scoring;
         Wait(1, Ignore Condition);
+        Set Global Variable(RestartLobbyTime, Subtract(Add(Multiply(Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1), 999999999999), Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart Lobby After X minutes"), 15, 1, 60, 0)), 1));
         Set Global Variable(LeaderboardText, Null);
         Set Global Variable(LeaderboardEntries, Empty Array);
         Set Global Variable(LeaderboardRemake, Null);
@@ -638,8 +638,7 @@ rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
     }
     conditions {
         (Host Player).WsEditorOn == False;
-        Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1) == False;
-        Total Time Elapsed > Multiply(Subtract(Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart lobby after X minutes"), 15, 1, 60, 0), 1), 60);
+        Total Time Elapsed > Multiply(Global.RestartLobbyTime, 60);
     }
     actions {
         Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting in 1 minute...", Icon String(Warning)));
@@ -748,7 +747,7 @@ rule ("Editor | Export Data") {
         Set Global Variable(CreatorName, Null);
         Set Global Variable(MapCode, Null);
         Set Global Variable(RestartLobbyTime, Null);
-        Set Global Variable(InfiniteLobbyTime, Null);
+        "InfiniteLobbyTime = null #$$ Remove"
         Enable Inspector Recording;
         Disable Inspector Recording;
         Small Message(Host Player, Custom String("   Map Data Exported - Open Inspector"));
