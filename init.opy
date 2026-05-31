@@ -7,6 +7,9 @@ rule "Init Global":
     disableAnnouncer()
     disableGamemodeCompletion()
     disableScoring()
+    startForcingSpawn(Team.ALL, 0)
+    startForcingSpawn(Team.ALL, 1)
+    startForcingSpawn(Team.ALL, 2)
     RestartLobbyTime = (
         createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1) * Math.INFINITY +
         createWorkshopSettingInt("Lobby Setting", "Restart Lobby After X minutes", 15, 1, 60, 0) - 1
@@ -37,7 +40,7 @@ rule "Init Player":
     eventPlayer.disablePlayerCollision()
     eventPlayer.setAbility1Enabled(false)
     eventPlayer.setStatusEffect(null, Status.INVINCIBLE, 999999)
-    
+    eventPlayer.setMoveSpeed(162) #@@
 	eventPlayer.GoalCheckpoint = vect(0,-100,0)
 	
 	wait(ELoadOrder.SETUP + 0.1)
