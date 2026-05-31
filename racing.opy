@@ -8,8 +8,8 @@ def SetCheckpoints():
 
 #$$ Combine into GoToResetPoint()
 def ResetSpeed(): 
-    eventPlayer.setMoveSpeed(100)
-    eventPlayer.SpeedMultiplier = 100
+    #@@ eventPlayer.setMoveSpeed(100)
+    #@@ eventPlayer.SpeedMultiplier = 100
 
 
 
@@ -99,8 +99,9 @@ rule "Arrive at Checkpoint":
     # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
-    eventPlayer.SpeedMultiplier += 3
+    #@@ eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
+    #@@ eventPlayer.SpeedMultiplier += 3
+    eventPlayer.applyImpulse(eventPlayer.getVelocity(), 4, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
 
     eventPlayer.CurrentCheckpointIdx += 1
     SetCheckpoints()
