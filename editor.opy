@@ -51,19 +51,18 @@ rule "Editor | Enable Checkpoint Selection":
 
 
 rule "Editor | Export Data":
-    @Event eachPlayer
-    @Condition eventPlayer == hostPlayer
+    @Event global # Forces 'Variable Target' to be Global
     @Condition hostPlayer.WsEditorOn
-	# @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF 
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-	@Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
-	@Condition not eventPlayer.ShouldShowExportInstructions
+	# @Condition hostPlayer.CurrentEditorMode == EEditorMode.OFF 
+    @Condition hostPlayer.isHoldingButton(Button.INTERACT)
+	@Condition hostPlayer.isHoldingButton(Button.ULTIMATE)
+	@Condition not hostPlayer.ShouldShowExportInstructions
 	
     wait(0.5, Wait.ABORT_WHEN_FALSE)
-    enableInspector()
-	smallMessage(eventPlayer, "   Map Data Exporting...")
-	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
-	eventPlayer.ShouldShowExportInstructions = true
+    #$$ Remove
+	# smallMessage(hostPlayer, "   Map Data Exporting...")
+	# playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
+	hostPlayer.ShouldShowExportInstructions = true
     LeaderboardText = null
     LeaderboardEntries = null
     LeaderboardRemake = null
@@ -72,10 +71,10 @@ rule "Editor | Export Data":
 	MapCode = null
 	RestartLobbyTime = null
 	InfiniteLobbyTime = null
-	wait(1)
+    enableInspector()
     disableInspector()
-    smallMessage(eventPlayer, "   Map Data Exported - Check Inspector")
-	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+    smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")
+	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
 
 
 rule "Editor | Hide Export instruction":

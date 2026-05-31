@@ -190,7 +190,7 @@ rule "Editor HUD":
         "   Already Done Upon Opening This Window\n\n"
 
         " 1. Copy Data:\n"
-        "   Open Workshop Inspector -> Set Variable Target To Global\n"
+        "   Open Workshop Inspector\n" # ' -> Set Variable Target To Global' #$$ Variable Target is Global
         "   Click The [(X)] button\n\n"
 
         " 2. Insert Data:\n"
