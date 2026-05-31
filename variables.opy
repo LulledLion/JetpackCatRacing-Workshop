@@ -85,6 +85,7 @@ enum ELoadOrder:
     HUDS_GLOBAL  = 0.016 * 48,
     #HUDS_PLAYER  = 0.016 * 56,
     #HUDS_EDITOR  = 0.016 * 64,
+    MISSING_DATA = 3,
     EFFECTS     = 0.016 * 256,
 
 # _END are general purpose last order huds for their side
