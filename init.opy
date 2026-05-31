@@ -20,10 +20,6 @@ rule "Init Global":
 	if Checkpoints == 0:
     	Checkpoints = []
 
-	RestartLobbyTime = createWorkshopSettingInt("Lobby Setting", "Restart lobby after X minutes", 15, 1, 60, 0)
-	InfiniteLobbyTime = createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1)
-
-
 
 rule "Init Player":
     @Event playerJoined

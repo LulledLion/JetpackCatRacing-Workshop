@@ -203,21 +203,12 @@ rule "Addon | Little Destructo - Fence Breaker":
         wait(0)
     MapVectorArray = null
 
-
-rule "[Timer] 1 minute before RestartLobbyTime minutes has passed, warn the lobby":
-	@Condition not hostPlayer.WsEditorOn
-	@Condition not InfiniteLobbyTime
-	@Condition getTotalTimeElapsed() > (RestartLobbyTime - 1) * 60
-
-	bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
-
-
-
 rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
 	@Condition not hostPlayer.WsEditorOn
-	@Condition not InfiniteLobbyTime
-	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
-
+	@Condition not createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1)
+	@Condition getTotalTimeElapsed() > (createWorkshopSettingInt("Lobby Setting", "Restart lobby after X minutes", 15, 1, 60, 0) - 1) * 60
+    bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
+    wait(60)
 	bigMessage(getAllPlayers(), "   {0} Lobby is restarting now...".format(iconString(Icon.WARNING)))
 	wait(3)
 	restartMatch()
