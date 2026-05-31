@@ -40,6 +40,7 @@ settings
 				Frenetic Flight Recharge Rate: 500%
 				Frenetic Flight Unlimited Fuel: On
 				Ultimate Ability Catnapper: Off
+				No Ammunition Requirement: On
 			}
 			enabled heroes
 			{
@@ -271,9 +272,6 @@ rule ("Init Global") {
         Wait(0.512, Ignore Condition);
         If(Compare(Global.Checkpoints, ==, 0));
             Set Global Variable(Checkpoints, Empty Array);
-        End;
-        Set Global Variable(RestartLobbyTime, Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart lobby after X minutes"), 15, 1, 60, 0));
-        Set Global Variable(InfiniteLobbyTime, Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1));
     }
 }
 
@@ -412,23 +410,7 @@ rule ("Editor HUD") {
         "move fast/slow in move mode"
         Create HUD Text(If-Then-Else(And(And((Host Player).WsEditorOn, Compare((Host Player).CurrentEditorMode, ==, 2)), (Host Player).ActivelyEditing), Host Player, Null), Null, Null, Custom String("Hold [{0}]: Move fast\nHold [{1}]: Move slow", Input Binding String(Button(Primary Fire)), Input Binding String(Button(Secondary Fire))), Right, 25, Null, Null, Value In Array(Global.ColorConfig, 3), Visible To and String, Default Visibility);
         "Export instruction"
-        Create HUD Text(If-Then-Else((Host Player).ShouldShowExportInstructions, Host Player, Null), Custom String(" 0. Clear Extra Data:\n   Already Done Upon Opening This Window\n\n 1. Copy Data:\n   Open Workshop Inspector -> Set Variable Tar{0}", Custom String("get To Global\n   Click The [(X)] button\n\n 2. Insert Data:\n   Paste The Data Into Rule Named 'Map # Data <--- Insert Map Data {0}", Custom String("Here' \n   in the workshop editor\n\n 3. Workshop Settings:\n   Esc -> Show Lobby -> Settings -> Workshop Settings ->\n   Toggle '{0}", Custom String("Editor Mode Enabled' to 'Off'\n\n 4. Create Initial Sharecode:\n   Esc -> Show Lobby -> Settings -> Share Code ->\n   Create New {0}", Custom String("Code -> Copy Code\n\n 5. Add Credits:\n   Enter Your Name & Map Code In The 'Customize Credits and\n   Colors Here' Rule in the w{0}", Custom String("orkshop editor\n\n 6. Update For Credits:\n   Esc -> Show Lobby -> Settings -> Share Code ->\n   Upload To Existing Code -> Paste{0}", Custom String(" The Code You Created In Step 4 \n\n Press [{0}] to hide this text", Input Binding String(Button(Melee))))))))), Null, Null, Top, 7, Color(Yellow), Color(White), Color(Lime Green), Visible To and String, Visible Never);
-    }
-}
-
-rule ("Anti Crash") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Server Load > 250;
-    }
-    actions {
-        Wait(1, Abort When False);
-        Small Message(All Players(All Teams), Custom String("anti-crash system activated"));
-        Set Slow Motion(10);
-        Wait Until(Compare(Server Load, <, 230), 999999999999);
-        Set Slow Motion(100);
+        Create HUD Text(If-Then-Else((Host Player).ShouldShowExportInstructions, Host Player, Null), Custom String(" 0. Clear Extra Data:\n   Already Done Upon Opening This Window\n\n 1. Copy Data:\n   Open Workshop Inspector\n   Click The [(X)] {0}", Custom String("button\n\n 2. Insert Data:\n   Paste The Data Into Rule Named 'Map # Data <--- Insert Map Data Here' \n   in the workshop editor\n{0}", Custom String("\n 3. Workshop Settings:\n   Esc -> Show Lobby -> Settings -> Workshop Settings ->\n   Toggle 'Editor Mode Enabled' to 'Off'\n\n 4{0}", Custom String(". Create Initial Sharecode:\n   Esc -> Show Lobby -> Settings -> Share Code ->\n   Create New Code -> Copy Code\n\n 5. Add Credit{0}", Custom String("s:\n   Enter Your Name & Map Code In The 'Customize Credits and\n   Colors Here' Rule in the workshop editor\n\n 6. Update For Cr{0}", Custom String("edits:\n   Esc -> Show Lobby -> Settings -> Share Code ->\n   Upload To Existing Code -> Paste The Code You Created In Step 4 \n{0}", Custom String("\n Press [{0}] to hide this text", Input Binding String(Button(Melee))))))))), Null, Null, Top, 7, Color(Yellow), Color(White), Color(Lime Green), Visible To and String, Visible Never);
     }
 }
 
@@ -466,6 +448,7 @@ rule ("Subroutine GoToResetPoint") {
             Respawn(Event Player);
             Abort;
         End;
+        "$$ Teleport Unnecessary"
         Teleport(Event Player, (Event Player).CurrentCheckpoint);
         Start Forcing Player Position(Event Player, (Event Player).CurrentCheckpoint, True);
         Wait(0.016, Ignore Condition);
@@ -476,22 +459,17 @@ rule ("Subroutine GoToResetPoint") {
     }
 }
 
-rule ("Reset - Single Checkpoint") {
+rule ("Subroutine LeaderboardUpdate") {
     event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        "@Condition not hostPlayer.WsEditorOn"
-        (Event Player).CurrentEditorMode == 0;
-        Is Button Held(Event Player, Button(Reload)) == True;
+        Subroutine;
+        LeaderboardUpdate;
     }
     actions {
-        Wait Until(Not(Is Button Held(Event Player, Button(Reload))), 0.3);
-        Abort If(Is Button Held(Event Player, Button(Reload)));
-        Call Subroutine(GoToResetPoint);
-        Call Subroutine(ResetSpeed);
+        "this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left."
+        Set Global Variable(LeaderboardRemake, True);
+        Wait(0, Ignore Condition);
+        "set false again to prevent board locking"
+        Set Global Variable(LeaderboardRemake, False);
     }
 }
 
@@ -514,61 +492,6 @@ rule ("Subroutine FullReset") {
             Chase Player Variable At Rate(Event Player, Timer, 999999999999, 1, Destination and Rate);
         End;
         Set Player Variable(Event Player, IsRacing, True);
-    }
-}
-
-rule ("Reset - Full") {
-    event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        "@Condition not hostPlayer.WsEditorOn"
-        (Event Player).CurrentEditorMode == 0;
-        Is Button Held(Event Player, Button(Reload)) == True;
-    }
-    actions {
-        Wait(0.5, Abort When False);
-        Call Subroutine(FullReset);
-    }
-}
-
-rule ("Handle Death") {
-    event {
-        Player Died;
-        All;
-        All;
-    }
-    actions {
-        Respawn(Event Player);
-        Call Subroutine(GoToResetPoint);
-        Call Subroutine(ResetSpeed);
-    }
-}
-
-rule ("Arrive at Checkpoint") {
-    event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        (Event Player).GoalCheckpoint != Null;
-        "2.65"
-        Distance Between((Event Player).GoalCheckpoint, Eye Position(Event Player)) <= Global.RingSize;
-        Is Alive(Event Player) == True;
-        (Event Player).IsRacing != False;
-        (Event Player).CurrentEditorMode == 0;
-        Count Of(Global.Checkpoints) > 1;
-    }
-    actions {
-        "TODO: Separate starting the level vs arriving at a checkpoint IN the level?"
-        Play Effect(Event Player, Buff Explosion Sound, Color(White), Eye Position(Event Player), 100);
-        Set Move Speed(Event Player, Multiply((Event Player).SpeedMultiplier, 2));
-        Modify Player Variable(Event Player, SpeedMultiplier, Add, 3);
-        Modify Player Variable(Event Player, CurrentCheckpointIdx, Add, 1);
-        Call Subroutine(SetCheckpoints);
     }
 }
 
@@ -633,17 +556,77 @@ rule ("Finish") {
     }
 }
 
-rule ("Subroutine LeaderboardUpdate") {
+rule ("Arrive at Checkpoint") {
     event {
-        Subroutine;
-        LeaderboardUpdate;
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        (Event Player).GoalCheckpoint != Null;
+        "2.65"
+        Distance Between((Event Player).GoalCheckpoint, Eye Position(Event Player)) <= Global.RingSize;
+        Is Alive(Event Player) == True;
+        (Event Player).IsRacing != False;
+        (Event Player).CurrentEditorMode == 0;
+        Count Of(Global.Checkpoints) > 1;
     }
     actions {
-        "this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left."
-        Set Global Variable(LeaderboardRemake, True);
-        Wait(0.1, Ignore Condition);
-        "set false again to prevent board locking"
-        Set Global Variable(LeaderboardRemake, False);
+        "TODO: Separate starting the level vs arriving at a checkpoint IN the level?"
+        Play Effect(Event Player, Buff Explosion Sound, Color(White), Eye Position(Event Player), 100);
+        Set Move Speed(Event Player, Multiply((Event Player).SpeedMultiplier, 2));
+        Modify Player Variable(Event Player, SpeedMultiplier, Add, 3);
+        Modify Player Variable(Event Player, CurrentCheckpointIdx, Add, 1);
+        Call Subroutine(SetCheckpoints);
+    }
+}
+
+rule ("Reset - Single Checkpoint") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        "@Condition not hostPlayer.WsEditorOn"
+        (Event Player).CurrentEditorMode == 0;
+        Is Button Held(Event Player, Button(Reload)) == True;
+    }
+    actions {
+        Wait Until(Not(Is Button Held(Event Player, Button(Reload))), 0.3);
+        Abort If(Is Button Held(Event Player, Button(Reload)));
+        Call Subroutine(GoToResetPoint);
+        Call Subroutine(ResetSpeed);
+    }
+}
+
+rule ("Reset - Full") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        "@Condition not hostPlayer.WsEditorOn"
+        (Event Player).CurrentEditorMode == 0;
+        Is Button Held(Event Player, Button(Reload)) == True;
+    }
+    actions {
+        Wait(0.5, Abort When False);
+        Call Subroutine(FullReset);
+    }
+}
+
+rule ("Handle Death") {
+    event {
+        Player Died;
+        All;
+        All;
+    }
+    actions {
+        Respawn(Event Player);
+        Call Subroutine(GoToResetPoint);
+        Call Subroutine(ResetSpeed);
     }
 }
 
@@ -681,33 +664,37 @@ rule ("Addon | Little Destructo - Fence Breaker") {
     }
 }
 
-rule ("[Timer] 1 minute before RestartLobbyTime minutes has passed, warn the lobby") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        (Host Player).WsEditorOn == False;
-        Global.InfiniteLobbyTime == False;
-        Total Time Elapsed > Multiply(Subtract(Global.RestartLobbyTime, 1), 60);
-    }
-    actions {
-        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting in 1 minute...", Icon String(Warning)));
-    }
-}
-
 rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
     event {
         Ongoing - Global;
     }
     conditions {
         (Host Player).WsEditorOn == False;
-        Global.InfiniteLobbyTime == False;
-        Total Time Elapsed > Multiply(Global.RestartLobbyTime, 60);
+        Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1) == False;
+        Total Time Elapsed > Multiply(Subtract(Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart lobby after X minutes"), 15, 1, 60, 0), 1), 60);
     }
     actions {
+        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting in 1 minute...", Icon String(Warning)));
+        Wait(60, Ignore Condition);
         Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting now...", Icon String(Warning)));
         Wait(3, Ignore Condition);
         Restart Match;
+    }
+}
+
+rule ("Anti Crash") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Server Load > 250;
+    }
+    actions {
+        Wait(1, Abort When False);
+        Small Message(All Players(All Teams), Custom String("anti-crash system activated"));
+        Set Slow Motion(10);
+        Wait Until(Compare(Server Load, <, 230), 999999999999);
+        Set Slow Motion(100);
     }
 }
 
@@ -773,24 +760,19 @@ rule ("Editor | Enable Checkpoint Selection") {
 
 rule ("Editor | Export Data") {
     event {
-        Ongoing - Each Player;
-        All;
-        All;
+        Ongoing - Global;
     }
     conditions {
-        Event Player == Host Player;
         (Host Player).WsEditorOn != False;
-        "@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF"
-        Is Button Held(Event Player, Button(Interact)) == True;
-        Is Button Held(Event Player, Button(Ultimate)) == True;
-        (Event Player).ShouldShowExportInstructions == False;
+        "@Condition hostPlayer.CurrentEditorMode == EEditorMode.OFF"
+        Is Button Held(Host Player, Button(Interact)) == True;
+        Is Button Held(Host Player, Button(Ultimate)) == True;
+        (Host Player).ShouldShowExportInstructions == False;
     }
     actions {
         Wait(0.5, Abort When False);
-        Enable Inspector Recording;
-        Small Message(Event Player, Custom String("   Map Data Exporting..."));
-        Play Effect(Event Player, Buff Impact Sound, Color(White), If-Then-Else(Compare((Event Player).CurrentEditorMode, ==, 0), Position Of(Host Player), Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx)), 100);
-        Set Player Variable(Event Player, ShouldShowExportInstructions, True);
+        "smallMessage(hostPlayer, \"   Map Data Exporting...\")\nplayEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)"
+        Set Player Variable(Host Player, ShouldShowExportInstructions, True);
         Set Global Variable(LeaderboardText, Null);
         Set Global Variable(LeaderboardEntries, Null);
         Set Global Variable(LeaderboardRemake, Null);
@@ -799,10 +781,10 @@ rule ("Editor | Export Data") {
         Set Global Variable(MapCode, Null);
         Set Global Variable(RestartLobbyTime, Null);
         Set Global Variable(InfiniteLobbyTime, Null);
-        Wait(1, Ignore Condition);
+        Enable Inspector Recording;
         Disable Inspector Recording;
-        Small Message(Event Player, Custom String("   Map Data Exported - Check Inspector"));
-        Play Effect(Event Player, Buff Impact Sound, Color(White), If-Then-Else(Compare((Event Player).CurrentEditorMode, ==, 0), Position Of(Host Player), Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx)), 100);
+        Small Message(Host Player, Custom String("   Map Data Exported - Open Inspector"));
+        Play Effect(Host Player, Buff Impact Sound, Color(White), If-Then-Else(Compare((Host Player).CurrentEditorMode, ==, 0), Position Of(Host Player), Value In Array(Global.Checkpoints, (Host Player).CurrentCheckpointIdx)), 100);
     }
 }
 
