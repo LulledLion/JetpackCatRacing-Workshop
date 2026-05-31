@@ -25,6 +25,7 @@ settings
 		}
 		General
 		{
+			Game Mode Start: Manual
 			Hero Limit: Off
 			Respawn Time Scalar: 10%
 			Spawn Health Packs: Disabled
@@ -99,7 +100,6 @@ subroutines {
     6: DisableAbilities
     7: EnableAbilities
     8: SetCheckpoints
-    9: LeaderboardUpdate
 }
 
 //Strict optimizations enabled
@@ -267,7 +267,7 @@ rule ("Init Global") {
         Wait(1, Ignore Condition);
         Set Global Variable(LeaderboardText, Null);
         Set Global Variable(LeaderboardEntries, Empty Array);
-        Set Global Variable(LeaderboardRemake, False);
+        Set Global Variable(LeaderboardRemake, Null);
         Set Match Time(900);
         Wait(0.512, Ignore Condition);
         If(Compare(Global.Checkpoints, ==, 0));
@@ -307,10 +307,10 @@ rule ("After 3s if the checkpoints are empty then provide a warning") {
         Ongoing - Global;
     }
     conditions {
+        Total Time Elapsed > 3;
         Count Of(Global.Checkpoints) == 0;
     }
     actions {
-        Wait(3, Abort When False);
         Create HUD Text(If-Then-Else(And(Compare(Local Player, ==, Host Player), (Host Player).WsEditorOn), Null, Local Player), Custom String(" {0} Warning: Map has no data ", Icon String(Warning)), Null, Null, Top, 5, Color(Red), Null, Null, Visible To, Default Visibility);
     }
 }
@@ -352,15 +352,12 @@ rule ("Remake Leaderboard HUD") {
         Global.LeaderboardRemake != False;
     }
     actions {
+        Set Global Variable(LeaderboardRemake, Null);
         Set Global Variable(LeaderboardEntries, Sorted Array(Global.LeaderboardEntries, Value In Array(Current Array Element, 1)));
         "delete previous board (because re-val is off)"
         While(Compare(Count Of(Global.LeaderboardText), >, 0));
             Destroy HUD Text(First Of(Global.LeaderboardText));
             Modify Global Variable(LeaderboardText, Remove From Array By Index, 0);
-        End;
-        If(Compare(Count Of(Global.LeaderboardEntries), <, 1));
-            Set Global Variable(LeaderboardRemake, False);
-            Abort;
         End;
         If(First Of(Global.LeaderboardEntries));
             Create HUD Text(All Players(All Teams), Null, Null, Custom String("{0} Top 5 {0}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire))), Right, 17, Null, Null, Color(White), Visible To and String, Default Visibility);
@@ -370,18 +367,15 @@ rule ("Remake Leaderboard HUD") {
             If(Value In Array(Global.LeaderboardEntries, 1));
                 Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 1)), Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), Right, 19, Color(Orange), Color(Orange), Color(Orange), Visible To, Default Visibility);
                 Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
-            End;
-            If(Value In Array(Global.LeaderboardEntries, 2));
-                Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 2)), Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), Right, 20, Color(Yellow), Color(Yellow), Color(Yellow), Visible To, Default Visibility);
-                Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
-            End;
-            If(Value In Array(Global.LeaderboardEntries, 3));
-                Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 3)), Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), Right, 21, Color(Lime Green), Color(Lime Green), Color(Lime Green), Visible To, Default Visibility);
-                Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
-            End;
-            If(Value In Array(Global.LeaderboardEntries, 4));
-                Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 4)), Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), Right, 22, Color(Green), Color(Green), Color(Green), Visible To, Default Visibility);
-                Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
+                If(Value In Array(Global.LeaderboardEntries, 2));
+                    Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 2)), Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), Right, 20, Color(Yellow), Color(Yellow), Color(Yellow), Visible To, Default Visibility);
+                    Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
+                    If(Value In Array(Global.LeaderboardEntries, 3));
+                        Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 3)), Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), Right, 21, Color(Lime Green), Color(Lime Green), Color(Lime Green), Visible To, Default Visibility);
+                        Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
+                        If(Value In Array(Global.LeaderboardEntries, 4));
+                            Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 4)), Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), Right, 22, Color(Green), Color(Green), Color(Green), Visible To, Default Visibility);
+                            Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
     }
 }
 
@@ -459,20 +453,6 @@ rule ("Subroutine GoToResetPoint") {
     }
 }
 
-rule ("Subroutine LeaderboardUpdate") {
-    event {
-        Subroutine;
-        LeaderboardUpdate;
-    }
-    actions {
-        "this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left."
-        Set Global Variable(LeaderboardRemake, True);
-        Wait(0, Ignore Condition);
-        "set false again to prevent board locking"
-        Set Global Variable(LeaderboardRemake, False);
-    }
-}
-
 rule ("Subroutine FullReset") {
     event {
         Subroutine;
@@ -511,48 +491,36 @@ rule ("Finish") {
     actions {
         Set Player Variable(Event Player, IsRacing, False);
         Stop Chasing Player Variable(Event Player, Timer);
-        "Don't record leaderboard times"
+        "Don't record editor times"
         Abort If((Event Player).WsEditorOn);
-        "new top 5 if faster or entry doesnt exist yet"
-        If(Or(Or(Or(Or(Or(Or(Or(Or(Or(Compare(Value In Array(First Of(Global.LeaderboardEntries), 1), >, (Event Player).Timer), Not(First Of(Global.LeaderboardEntries))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 1))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 2))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 3))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 4))));
-            Big Message(All Players(All Teams), Custom String("New top 5 time: {0} by {1}!", (Event Player).Timer, Event Player));
-        End;
-        "you already have a time"
         If(Array Contains(Mapped Array(Global.LeaderboardEntries, First Of(Current Array Element)), Custom String("{0}", Event Player)));
-            "new time worse"
+            "you already have a time"
             If(Compare((Event Player).Timer, >, Value In Array(First Of(Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player)))), 1)));
                 Big Message(Event Player, Custom String("Completion time: {0}", (Event Player).Timer));
-                Skip(23);
-            "new time better"
-            Else;
-                Big Message(Event Player, Custom String("New personal best: {0}", (Event Player).Timer));
-                Modify Global Variable(LeaderboardEntries, Remove From Array By Value, Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player))));
-                Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).Timer)));
-                Set Player Variable(Event Player, PersonalBest, (Event Player).Timer);
-                Call Subroutine(LeaderboardUpdate);
+                "new time worse"
+                Abort;
             End;
+            Big Message(Event Player, Custom String("New personal best: {0}", (Event Player).Timer));
+            Modify Global Variable(LeaderboardEntries, Remove From Array By Value, Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player))));
+            Set Player Variable(Event Player, PersonalBest, (Event Player).Timer);
         "you are not in list yet"
         Else;
             Set Player Variable(Event Player, PersonalBest, (Event Player).Timer);
             Big Message(Event Player, Custom String("Completion time: {0}", (Event Player).Timer));
-            "board has room for more"
-            If(Compare(Count Of(Global.LeaderboardEntries), <, 20));
-                Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).Timer)));
-                Call Subroutine(LeaderboardUpdate);
-            "20 entries already"
+            "board has room for more or faster than last entry"
+            If(Or(Compare(Count Of(Global.LeaderboardEntries), <, 25), Compare((Event Player).Timer, <, Value In Array(Value In Array(Global.LeaderboardEntries, 24), 1))));
+                Modify Global Variable(LeaderboardEntries, Remove From Array By Index, 24);
             Else;
-                "your time lower then last entry"
-                If(Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 19), 1), <, (Event Player).Timer));
-                    Skip(7);
-                "you beat the last entry, thus replacing it"
-                Else;
-                    Modify Global Variable(LeaderboardEntries, Remove From Array By Index, 19);
-                    Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).Timer)));
-                    Call Subroutine(LeaderboardUpdate);
-                End;
+                "your time lower than last entry"
+                Abort;
             End;
         End;
-        //lbl_a:
+        "new top 5 if faster or entry doesnt exist yet"
+        If(Or(Or(Or(Or(Or(Or(Or(Or(Or(Compare(Value In Array(First Of(Global.LeaderboardEntries), 1), >, (Event Player).Timer), Not(First Of(Global.LeaderboardEntries))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 1))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 2))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 3))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 4))));
+            Big Message(All Players(All Teams), Custom String("New top 5 time: {0} by {1}!", (Event Player).Timer, Event Player));
+        End;
+        Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).Timer)));
+        Set Global Variable(LeaderboardRemake, True);
     }
 }
 
