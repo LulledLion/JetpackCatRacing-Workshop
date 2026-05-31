@@ -19,7 +19,7 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 		eventPlayer.respawn()
 		return
     
-    #eventPlayer.teleport(eventPlayer.CurrentCheckpoint) #$$ Teleport Unnecessary
+    eventPlayer.teleport(eventPlayer.CurrentCheckpoint) #$$ Teleport Unnecessary
     eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
     wait()
     if not eventPlayer.CurrentEditorMode:
