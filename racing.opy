@@ -57,19 +57,8 @@ rule "Finish":
     eventPlayer.IsRacing = false
     stopChasingVariable(eventPlayer.Timer)
 
-	# Don't record leaderboard times
-	if eventPlayer.WsEditorOn:
+	if eventPlayer.WsEditorOn: # Don't record editor times
 		return
-
-    # new top 5 if faster or entry doesnt exist yet    
-    if (
-        LeaderboardEntries[0][1] > eventPlayer.Timer or not LeaderboardEntries[0] or
-        LeaderboardEntries[1][1] > eventPlayer.Timer or not LeaderboardEntries[1] or
-        LeaderboardEntries[2][1] > eventPlayer.Timer or not LeaderboardEntries[2] or
-        LeaderboardEntries[3][1] > eventPlayer.Timer or not LeaderboardEntries[3] or
-        LeaderboardEntries[4][1] > eventPlayer.Timer or not LeaderboardEntries[4]
-    ):
-        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.Timer, eventPlayer))
 
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
         # you already have a time
@@ -86,6 +75,15 @@ rule "Finish":
             del LeaderboardEntries[24]
         else:
             return # your time lower than last entry
+
+    # new top 5 if faster or entry doesnt exist yet    
+    if (LeaderboardEntries[0][1] > eventPlayer.Timer or not LeaderboardEntries[0] or
+        LeaderboardEntries[1][1] > eventPlayer.Timer or not LeaderboardEntries[1] or
+        LeaderboardEntries[2][1] > eventPlayer.Timer or not LeaderboardEntries[2] or
+        LeaderboardEntries[3][1] > eventPlayer.Timer or not LeaderboardEntries[3] or
+        LeaderboardEntries[4][1] > eventPlayer.Timer or not LeaderboardEntries[4]):
+        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.Timer, eventPlayer))
+    
     LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.Timer]] )
     LeaderboardRemake = true
 
