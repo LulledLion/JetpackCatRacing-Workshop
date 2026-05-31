@@ -33,7 +33,8 @@ settings {
             "jetpackCat": {
                 "secondaryFireRechargeRate%": 500,
                 "enablePassiveUnlimitedFuel": true,
-                "enableUlt": false
+                "enableUlt": false,
+                "enableInfiniteAmmo": true
             },
             "enabledHeroes": [
                 "jetpackCat"
