@@ -62,7 +62,7 @@ rule "test huds":
 # turns bots on/off completly
 macro bots_on = true
 
-macro = testbot_number = 10
+macro testbot_number = 10
 macro test_team = Team.2
 
 # test leaderboard (doesnt triger if action is on)
