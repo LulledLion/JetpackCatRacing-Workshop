@@ -5,20 +5,21 @@ def SetCheckpoints():
     eventPlayer.GoalCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 1]
     eventPlayer.AfterNextCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 2]
 
-def ResetSpeed():
+
+#$$ Combine into GoToResetPoint()
+def ResetSpeed(): 
     eventPlayer.setMoveSpeed(100)
     eventPlayer.SpeedMultiplier = 100
 
 
 
 def GoToResetPoint(): # go to CurrentCheckpoint
-
 	# If there's no checkpoint set then ignore it
 	if eventPlayer.CurrentCheckpoint == null:
 		eventPlayer.respawn()
 		return
-
-    eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
+    
+    eventPlayer.teleport(eventPlayer.CurrentCheckpoint) #$$ Teleport Unnecessary
     eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
     wait()
     if not eventPlayer.CurrentEditorMode:
@@ -50,7 +51,7 @@ def FullReset():
 		chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
     
 	eventPlayer.IsRacing = true
-    
+
 
 rule "Finish":
     @Event eachPlayer
