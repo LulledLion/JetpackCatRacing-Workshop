@@ -22,6 +22,7 @@ settings {
 		"tdm": {
 		},
         "general": {
+            "gamemodeStartTrigger": "manual",
             "heroLimit": "off",
             "respawnTime%": 10,
             "spawnHealthPacks": "disabled",
