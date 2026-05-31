@@ -299,4 +299,4 @@ def EnableAbilities():
     eventPlayer.allowButton(Button.SECONDARY_FIRE)
     eventPlayer.setAbility1Enabled(false) # This stays off always
     eventPlayer.setAbility2Enabled(true)
-    eventPlayer.setMoveSpeed(100)
+    eventPlayer.setMoveSpeed(162) #@@
