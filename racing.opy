@@ -28,14 +28,6 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 
 
 
-def LeaderboardUpdate():
-    # this sub just enabled the global board rule. you cant triger that sub directly from player becaues it would delete huds if player left.
-    LeaderboardRemake = true
-    wait(0)
-    LeaderboardRemake = false # set false again to prevent board locking
-
-
-
 def FullReset():
     stopChasingVariable(eventPlayer.Timer)
     eventPlayer.CurrentCheckpointIdx = 0
@@ -79,30 +71,23 @@ rule "Finish":
     ):
         bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.Timer, eventPlayer))
 
-    if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]): # you already have a time
-        if eventPlayer.Timer > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: # new time worse
+    if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
+        # you already have a time
+        if eventPlayer.Timer > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: 
             bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.Timer))
-            goto lbl_a
-        else: # new time better
-            bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.Timer))
-            LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
-            LeaderboardEntries.append( [["{0}".format(eventPlayer),eventPlayer.Timer]] )
-            eventPlayer.PersonalBest = eventPlayer.Timer
-            LeaderboardUpdate()
+            return # new time worse
+        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.Timer))
+        LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
+        eventPlayer.PersonalBest = eventPlayer.Timer
     else: # you are not in list yet
         eventPlayer.PersonalBest = eventPlayer.Timer
             bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.Timer))
-        if len(LeaderboardEntries) < 20: # board has room for more
-            LeaderboardEntries.append( [["{0}".format(eventPlayer),eventPlayer.Timer] ])
-            LeaderboardUpdate()
-        else: # 20 entries already
-            if LeaderboardEntries[19][1] < eventPlayer.Timer:  # your time lower then last entry
-                goto lbl_a
-            else: # you beat the last entry, thus replacing it
-                del LeaderboardEntries[19]
-                LeaderboardEntries.append( [["{0}".format(eventPlayer),eventPlayer.Timer]] )
-                LeaderboardUpdate()
-    lbl_a:
+        if len(LeaderboardEntries) < 25 or eventPlayer.Timer < LeaderboardEntries[24][1]: # board has room for more or faster than last entry
+            del LeaderboardEntries[24]
+        else:
+            return # your time lower than last entry
+    LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.Timer]] )
+    LeaderboardRemake = true
 
 
 

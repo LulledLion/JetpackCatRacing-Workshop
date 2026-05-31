@@ -53,7 +53,7 @@ subroutine StopEditorCamera
 subroutine DisableAbilities
 subroutine EnableAbilities
 subroutine SetCheckpoints
-subroutine LeaderboardUpdate
+# subroutine LeaderboardUpdate #$$ Remove
 
 # testscripts disable: ##, enable: #
 #!define test_script ##
