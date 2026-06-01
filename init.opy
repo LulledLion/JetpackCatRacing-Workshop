@@ -15,6 +15,10 @@ rule "Init Global":
     startForcingSpawn(Team.ALL, 0)
     startForcingSpawn(Team.ALL, 1)
     startForcingSpawn(Team.ALL, 2)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6844e199684e82266f3baebc7e5e5616e1621bd3
     LeaderboardText = null
     LeaderboardEntries = []
     LeaderboardRemake = null
