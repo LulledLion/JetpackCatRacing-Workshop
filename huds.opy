@@ -46,7 +46,8 @@ rule "Effects Setup":
     createEffect(localPlayer.filter(lambda _: localPlayer.GoalCheckpoint != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.GOAL_CP], localPlayer.GoalCheckpoint, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(localPlayer.filter(lambda _: localPlayer.AfterNextCheckpoint != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.AFTER_NEXT_CP], localPlayer.AfterNextCheckpoint, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     createEffect(localPlayer.filter(lambda _: Checkpoints[localPlayer.CurrentCheckpointIdx] != 0 and localPlayer.CurrentEditorMode > EEditorMode.OFF), Effect.GOOD_AURA, Color.RED, Checkpoints[localPlayer.CurrentCheckpointIdx], RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-
+    createBeam(localPlayer if localPlayer.GoalCheckpoint else null, Beam.BAD, localPlayer.CurrentCheckpoint, localPlayer.GoalCheckpoint, ColorConfig[ECustomize.GOAL_CP], EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createBeam(localPlayer if localPlayer.GoalCheckpoint and localPlayer.AfterNextCheckpoint else null, Beam.BAD, localPlayer.GoalCheckpoint, localPlayer.AfterNextCheckpoint, ColorConfig[ECustomize.AFTER_NEXT_CP], EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
     # checkpoint icon
     createIcon( 
         localPlayer.filter(lambda _: localPlayer.CurrentEditorMode == EEditorMode.OFF and localPlayer.GoalCheckpoint != 0 and not localPlayer.isInViewAngle(localPlayer.GoalCheckpoint, 4) ), 
