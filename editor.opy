@@ -7,7 +7,7 @@ rule "Editor | Enable Checkpoint Selection":
 	@Condition not eventPlayer.ShouldShowExportInstructions
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
 	@Condition not eventPlayer.isHoldingButton(Button.ULTIMATE)
-	
+
 	
 	if eventPlayer.IsMovingCheckpoint:
 		smallMessage(eventPlayer, "   {0} Checkpoint Movement Cancelled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
@@ -299,4 +299,4 @@ def EnableAbilities():
     eventPlayer.allowButton(Button.SECONDARY_FIRE)
     eventPlayer.setAbility1Enabled(false) # This stays off always
     eventPlayer.setAbility2Enabled(true)
-    eventPlayer.setMoveSpeed(162) #@@
+    eventPlayer.setMoveSpeed(100)
