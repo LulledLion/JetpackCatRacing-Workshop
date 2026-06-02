@@ -42,6 +42,7 @@ playervar EditCheckpointTemp
 playervar EditMeleeButtonPressed
 playervar IsMovingCheckpoint
 playervar ShouldShowExportInstructions
+playervar QuickRestart
 
 # Subroutines
 subroutine FullReset
