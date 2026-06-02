@@ -17,11 +17,10 @@ rule "HUD Setup":
         HudPosition.LEFT, EHudOrder.DISC, ColorConfig[ECustomize.DSC], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
     hudSubtext(getAllPlayers() if localPlayer.CurrentEditorMode == EEditorMode.OFF else null, 
-        (   "Press [{0}]: Quick restart\n"
-            "Hold [{0}]: Quick reset\n".format(inputBindingString(Button.RELOAD))
-        if localPlayer.QuickRestart else 
-            "Press [{0}]: Quick reset\n"
-            "Hold [{0}]: Quick restart\n".format(inputBindingString(Button.RELOAD))
+        "Press [{0}]: Quick reset\n"
+        "Hold [{0}]: full restart\n"
+        "".format(
+        	inputBindingString(Button.RELOAD)
         ), 
         HudPosition.RIGHT, EHudOrder.CONTROLS, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )

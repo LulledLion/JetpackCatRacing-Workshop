@@ -116,11 +116,20 @@ rule "Reset - Single Checkpoint":
     waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
     if eventPlayer.isHoldingButton(Button.RELOAD):
         return
-    if eventPlayer.QuickRestart or not eventPlayer.CurrentCheckpointIdx:
-        FullReset()
-    else:
-        GoToResetPoint()
-        ResetSpeed()
+
+    GoToResetPoint()
+    ResetSpeed()
+
+
+
+rule "Reset - Full":
+    @Event eachPlayer
+	# @Condition not hostPlayer.WsEditorOn
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+
+    wait(0.5, Wait.ABORT_WHEN_FALSE)
+    FullReset()
 
 
 
@@ -129,15 +138,6 @@ rule "Handle Death":
     eventPlayer.respawn()
     GoToResetPoint()
     ResetSpeed()
-
-
-
-rule "Toggle Quick Restart":
-    @Event eachPlayer
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
-    wait(0.5, Wait.ABORT_WHEN_FALSE)
-    eventPlayer.QuickRestart = not eventPlayer.QuickRestart
 
 
 
