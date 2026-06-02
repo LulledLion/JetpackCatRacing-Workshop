@@ -42,13 +42,9 @@ rule "Init Player":
     eventPlayer.disablePlayerCollision()
     eventPlayer.setAbility1Enabled(false)
     eventPlayer.setStatusEffect(null, Status.INVINCIBLE, 999999)
-    
-	eventPlayer.GoalCheckpoint = vect(0,-100,0)
-	
-	wait(ELoadOrder.SETUP + 0.1)
-	
-    eventPlayer.PersonalBest = null
-    waitUntil(getTotalTimeElapsed() > 1, 1) # map variables need to load first
+
+    waitUntil(getTotalTimeElapsed() > ELoadOrder.PLAYER_INIT, ELoadOrder.PLAYER_INIT) # map variables need to load first
+    wait(0.128)
     FullReset()
 
 

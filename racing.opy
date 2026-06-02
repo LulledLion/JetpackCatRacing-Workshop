@@ -19,7 +19,7 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 		eventPlayer.respawn()
 		return
     
-    eventPlayer.teleport(eventPlayer.CurrentCheckpoint) #$$ Teleport Unnecessary
+    eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
     eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
     wait()
     if not eventPlayer.CurrentEditorMode:
@@ -116,20 +116,11 @@ rule "Reset - Single Checkpoint":
     waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
     if eventPlayer.isHoldingButton(Button.RELOAD):
         return
-
-    GoToResetPoint()
-    ResetSpeed()
-
-
-
-rule "Reset - Full":
-    @Event eachPlayer
-	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
-
-    wait(0.5, Wait.ABORT_WHEN_FALSE)
-    FullReset()
+    if eventPlayer.QuickRestart or not eventPlayer.CurrentCheckpointIdx:
+        FullReset()
+    else:
+        GoToResetPoint()
+        ResetSpeed()
 
 
 
@@ -138,6 +129,15 @@ rule "Handle Death":
     eventPlayer.respawn()
     GoToResetPoint()
     ResetSpeed()
+
+
+
+rule "Toggle Quick Restart":
+    @Event eachPlayer
+	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
+    wait(0.5, Wait.ABORT_WHEN_FALSE)
+    eventPlayer.QuickRestart = not eventPlayer.QuickRestart
 
 
 
