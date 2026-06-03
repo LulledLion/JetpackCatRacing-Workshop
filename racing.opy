@@ -96,15 +96,28 @@ rule "Arrive at Checkpoint":
     @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
     @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition len(Checkpoints) > 1
-    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
-    playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
-    
-    #@@ eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
-    #@@ eventPlayer.SpeedMultiplier += 3
-    eventPlayer.applyImpulse(eventPlayer.getVelocity(), 4, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
-
     eventPlayer.CurrentCheckpointIdx += 1
     SetCheckpoints()
+    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
+    #@@ eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
+    #@@ eventPlayer.SpeedMultiplier += 3
+    playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
+    eventPlayer.applyImpulse(eventPlayer.getFacingDirection(), 0.25, Relativity.TO_WORLD, Impulse.INCORPORATE_CONTRARY_MOTION)
+    wait()
 
 
 
