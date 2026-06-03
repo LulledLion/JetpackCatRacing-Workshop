@@ -7,7 +7,7 @@ rule "Editor | Enable Checkpoint Selection":
 	@Condition not eventPlayer.ShouldShowExportInstructions
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
 	@Condition not eventPlayer.isHoldingButton(Button.ULTIMATE)
-	
+
 	
 	if eventPlayer.IsMovingCheckpoint:
 		smallMessage(eventPlayer, "   {0} Checkpoint Movement Cancelled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))

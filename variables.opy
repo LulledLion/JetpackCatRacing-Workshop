@@ -81,6 +81,7 @@ enum ELoadOrder:
     CUSTOMIZE   = 0,
     DESTRUCTO   = 0.016 * 2,
     SETUP       = 0.016 * 32,
+    PLAYER_INIT = 0.016 * 33
     #ADDON       = 0.016 * 40,
     HUDS_GLOBAL  = 0.016 * 48,
     #HUDS_PLAYER  = 0.016 * 56,
