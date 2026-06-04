@@ -29,7 +29,7 @@ rule "HUD Setup":
         localPlayer if not hostPlayer.ShouldShowExportInstructions else null, 
         iconString(Icon.ARROW_RIGHT) if localPlayer.IsRacing else iconString(Icon.FLAG) if localPlayer.CurrentCheckpointIdx == 0 else  iconString(Icon.CHECKMARK) , 
         "{} / {}".format(localPlayer.CurrentCheckpointIdx, len(Checkpoints)-1), 
-        "Time: {}".format(localPlayer.Timer), 
+        "Time: {}".format(localPlayer.CurrentTime), 
         HudPosition.TOP, 
 		EHudOrder.TIMER,
         ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], 

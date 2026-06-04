@@ -28,7 +28,9 @@ globalvar TestBotArray 126
 
 playervar WsEditorOn
 playervar CurrentEditorMode
-playervar Timer
+#playervar Timer
+playervar StartTime
+playervar StopTime
 playervar PersonalBest
 playervar IsRacing
 playervar SpeedMultiplier
@@ -124,6 +126,8 @@ enum EEditorMode:
     MOVE = 2,
     INSERT = 3,
     REMOVE = 4,
+
+macro Player.CurrentTime = self.StopTime or ( getTotalTimeElapsed() - self.StartTime if self.StartTime else 0 )
 
 macro Array.insertAt(index, item):
     self.append(null)
