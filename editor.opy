@@ -7,7 +7,7 @@ rule "Editor | Enable Checkpoint Selection":
 	@Condition not eventPlayer.ShouldShowExportInstructions
     @Condition eventPlayer.isHoldingButton(Button.INTERACT)
 	@Condition not eventPlayer.isHoldingButton(Button.ULTIMATE)
-	
+
 	
 	if eventPlayer.IsMovingCheckpoint:
 		smallMessage(eventPlayer, "   {0} Checkpoint Movement Cancelled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
@@ -51,19 +51,18 @@ rule "Editor | Enable Checkpoint Selection":
 
 
 rule "Editor | Export Data":
-    @Event eachPlayer
-    @Condition eventPlayer == hostPlayer
+    @Event global # Forces 'Variable Target' to be Global
     @Condition hostPlayer.WsEditorOn
-	# @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF 
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-	@Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
-	@Condition not eventPlayer.ShouldShowExportInstructions
+	# @Condition hostPlayer.CurrentEditorMode == EEditorMode.OFF 
+    @Condition hostPlayer.isHoldingButton(Button.INTERACT)
+	@Condition hostPlayer.isHoldingButton(Button.ULTIMATE)
+	@Condition not hostPlayer.ShouldShowExportInstructions
 	
     wait(0.5, Wait.ABORT_WHEN_FALSE)
-    enableInspector()
-	smallMessage(eventPlayer, "   Map Data Exporting...")
-	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
-	eventPlayer.ShouldShowExportInstructions = true
+    #$$ Remove
+	# smallMessage(hostPlayer, "   Map Data Exporting...")
+	# playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
+	hostPlayer.ShouldShowExportInstructions = true
     LeaderboardText = null
     LeaderboardEntries = null
     LeaderboardRemake = null
@@ -71,11 +70,11 @@ rule "Editor | Export Data":
 	CreatorName = null
 	MapCode = null
 	RestartLobbyTime = null
-	InfiniteLobbyTime = null
-	wait(1)
+	# InfiniteLobbyTime = null #$$ Remove
+    enableInspector()
     disableInspector()
-    smallMessage(eventPlayer, "   Map Data Exported - Check Inspector")
-	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+    smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")
+	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
 
 
 rule "Editor | Hide Export instruction":
@@ -242,11 +241,12 @@ rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to t
 	eventPlayer.EditMeleeButtonPressed = false
 
 
-#!define cam_distance 8
+macro cam_distance = 8
 # calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
 # if nothing is hit then it just returns max length
 # parameter is the start position
-#!define cam_dist_calc(start) (distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1)
+macro cam_dist_calc(start):
+    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1
 
 def StartEditorCamera():
     @Name "Editor | Start Editor 3rd Person Camera"

@@ -1,15 +1,11 @@
 
 #!optimizeStrict
-
+##!writeToOutputFile
 # settings ###################
-#!define VERSION "1.0.0"    
-
-#!define EDITOR_ON true
-#!define INSPECTOR_ON false
-
-# testscripts disable: ##, enable: #
-#!define test_script ##
-
+macro VERSION = "1.0.0"
+macro EDITOR_ON = true
+macro INSPECTOR_ON = false
+#!define JS(content) __script__("js.js")
 
 # includes ###################
 #!include "settings.opy"
@@ -29,4 +25,5 @@ divider(code)
 divider(editor)
 #!include "editor.opy"
 
-test_script!include "test_scripts.opy" 
+test_script!include "test_scripts.opy"
+#JS((TEST=>TEST?'#!include "test_scripts.opy"':'')( false ))
