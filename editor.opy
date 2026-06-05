@@ -46,6 +46,11 @@ rule "Editor | Enable Checkpoint Selection":
 		# start timer
 		if len(Checkpoints) > 1:
 			chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
+
+			if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
+				eventPlayer.IsRacing = true
+				
+		eventPlayer.teleport(Checkpoints[eventPlayer.CurrentCheckpointIdx])
 		wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
 

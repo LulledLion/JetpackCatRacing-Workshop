@@ -82,7 +82,8 @@ rule "Arrive at Checkpoint":
     @Event eachPlayer
 	@Condition eventPlayer.GoalCheckpoint != null
     @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
-    @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
+    @Condition eventPlayer.isAlive()
+	@Condition eventPlayer.IsRacing
     @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition len(Checkpoints) > 1
     # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
