@@ -13,7 +13,7 @@ globalvar GoalText 23
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
-globalvar InfiniteLobbyTime 51
+# globalvar InfiniteLobbyTime 51 #$$ Remove
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
@@ -53,7 +53,14 @@ subroutine StopEditorCamera
 subroutine DisableAbilities
 subroutine EnableAbilities
 subroutine SetCheckpoints
-subroutine LeaderboardUpdate
+# subroutine LeaderboardUpdate #$$ Remove
+
+# testscripts disable: ##, enable: #
+#!define test_script ##
+
+#!define divider(x) rule "------------------------------------------------------------------------  x ------------------------------------------------------------------------ ":\
+    @Delimiter\
+    @Disabled
 
 #!define LeftAlign100 "                                                                                                    "
 
@@ -74,10 +81,12 @@ enum ELoadOrder:
     CUSTOMIZE   = 0,
     DESTRUCTO   = 0.016 * 2,
     SETUP       = 0.016 * 32,
+    PLAYER_INIT = 0.016 * 33
     #ADDON       = 0.016 * 40,
     HUDS_GLOBAL  = 0.016 * 48,
     #HUDS_PLAYER  = 0.016 * 56,
     #HUDS_EDITOR  = 0.016 * 64,
+    MISSING_DATA = 3,
     EFFECTS     = 0.016 * 256,
 
 # _END are general purpose last order huds for their side
@@ -118,7 +127,7 @@ enum EEditorMode:
 
 macro Array.insertAt(index, item):
     self.append(null)
-    self = [CAE if CAI <= index else self[CAI - 1] for CAE, CAI in self]
+    self = self.map(lambda CAE, CAI: CAE if CAI <= index else self[CAI - 1])
     self[index] = item
 
 macro Player.flyMovementDelta():

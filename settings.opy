@@ -23,6 +23,7 @@ settings {
             "enabledMaps": []
         },
         "general": {
+            "gamemodeStartTrigger": "manual",
             "heroLimit": "off",
             "respawnTime%": 10,
             "spawnHealthPacks": "disabled",
@@ -34,7 +35,8 @@ settings {
             "jetpackCat": {
                 "secondaryFireRechargeRate%": 500,
                 "enablePassiveUnlimitedFuel": true,
-                "enableUlt": false
+                "enableUlt": false,
+                "enableInfiniteAmmo": true
             },
             "enabledHeroes": [
                 "jetpackCat"
@@ -43,6 +45,3 @@ settings {
     }
 }
 
-#!define divider(x) rule "------------------------------------------------------------------------  x ------------------------------------------------------------------------ ":\
-    @Delimiter\
-    @Disabled

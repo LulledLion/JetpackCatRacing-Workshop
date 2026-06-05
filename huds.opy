@@ -57,36 +57,39 @@ rule "Effects Setup":
 
 rule "Remake Leaderboard HUD":
     @Condition LeaderboardRemake
+    LeaderboardRemake = null
     LeaderboardEntries = sorted(LeaderboardEntries, lambda i: i[1])
 
     while len(LeaderboardText) > 0: # delete previous board (because re-val is off)
         destroyHudText(LeaderboardText[0])
         del LeaderboardText[0]
-    
-    if len(LeaderboardEntries) < 1:
-        LeaderboardRemake = false
-        return
 
+    /* #$$ For future use - Generates a single string leaderboard
+    LeaderBoardRemake = []
+    LeaderboardText = LeaderboardEntries.map(tuple: "　 {}:　{} - {}".format(CAI + 1, CAE[0], CAE.last()))
+    while len(LeaderboardText):
+        LeaderBoardRemake = "{}\n{}".format(LeaderBoardRemake, LeaderboardText[0])
+        del LeaderboardText[0]
+    LeaderBoardRemake = "{}\n".format(LeaderBoardRemake)
+    */
     if LeaderboardEntries[0]:
-            hudSubtext(getAllPlayers(),
-                "{0} Top 5 {0}".format(abilityIconString(Hero.JETPACK_CAT,Button.SECONDARY_FIRE))
-                , HudPosition.RIGHT, EHudOrder.TOP5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT
-            )
-            LeaderboardText.append(getLastCreatedText())
-            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[0][0], LeaderboardEntries[0][1], HudPosition.RIGHT, EHudOrder.TOP5+1, Color.RED, Color.RED, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-            LeaderboardText.append(getLastCreatedText())
+        hudSubtext(getAllPlayers(), "{0} Top 5 {0}".format(abilityIconString(Hero.JETPACK_CAT,Button.SECONDARY_FIRE))
+            , HudPosition.RIGHT, EHudOrder.TOP5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+        LeaderboardText.append(getLastCreatedText())
+        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[0][0], LeaderboardEntries[0][1], HudPosition.RIGHT, EHudOrder.TOP5+1, Color.RED, Color.RED, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        LeaderboardText.append(getLastCreatedText())
         if LeaderboardEntries[1]:
             hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[1][0], LeaderboardEntries[1][1], HudPosition.RIGHT, EHudOrder.TOP5+2, Color.ORANGE, Color.ORANGE, Color.ORANGE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
             LeaderboardText.append(getLastCreatedText())
-        if LeaderboardEntries[2]:
-            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[2][0], LeaderboardEntries[2][1], HudPosition.RIGHT, EHudOrder.TOP5+3, Color.YELLOW, Color.YELLOW, Color.YELLOW, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-            LeaderboardText.append(getLastCreatedText())
-        if LeaderboardEntries[3]:
-            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[3][0], LeaderboardEntries[3][1], HudPosition.RIGHT, EHudOrder.TOP5+4, Color.LIME_GREEN, Color.LIME_GREEN,Color.LIME_GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-            LeaderboardText.append(getLastCreatedText())
-        if LeaderboardEntries[4]:
-            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[4][0], LeaderboardEntries[4][1], HudPosition.RIGHT, EHudOrder.TOP5+5, Color.GREEN, Color.GREEN, Color.GREEN,HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
-            LeaderboardText.append(getLastCreatedText())
+            if LeaderboardEntries[2]:
+                hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[2][0], LeaderboardEntries[2][1], HudPosition.RIGHT, EHudOrder.TOP5+3, Color.YELLOW, Color.YELLOW, Color.YELLOW, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                LeaderboardText.append(getLastCreatedText())
+                if LeaderboardEntries[3]:
+                    hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[3][0], LeaderboardEntries[3][1], HudPosition.RIGHT, EHudOrder.TOP5+4, Color.LIME_GREEN, Color.LIME_GREEN,Color.LIME_GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                    LeaderboardText.append(getLastCreatedText())
+                    if LeaderboardEntries[4]:
+                        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[4][0], LeaderboardEntries[4][1], HudPosition.RIGHT, EHudOrder.TOP5+5, Color.GREEN, Color.GREEN, Color.GREEN,HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                        LeaderboardText.append(getLastCreatedText())
 
 
 rule "Editor HUD":
@@ -190,7 +193,7 @@ rule "Editor HUD":
         "   Already Done Upon Opening This Window\n\n"
 
         " 1. Copy Data:\n"
-        "   Open Workshop Inspector -> Set Variable Target To Global\n"
+        "   Open Workshop Inspector\n" # ' -> Set Variable Target To Global' #$$ Variable Target is Global
         "   Click The [(X)] button\n\n"
 
         " 2. Insert Data:\n"
