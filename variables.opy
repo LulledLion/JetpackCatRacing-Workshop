@@ -9,7 +9,7 @@ globalvar RingSize 10
 globalvar CreatorName 20
 globalvar MapCode 21
 globalvar ColorConfig 22
-globalvar GoalText 23
+# globalvar GoalText 23
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
@@ -32,6 +32,8 @@ playervar CurrentEditorMode
 playervar StartTime
 playervar StopTime
 playervar PersonalBest
+playervar OldPosition
+playervar CurrentPosition
 playervar IsRacing
 playervar SpeedMultiplier
 playervar CurrentCheckpointIdx
@@ -128,6 +130,18 @@ enum EEditorMode:
     REMOVE = 4,
 
 macro Player.CurrentTime = self.StopTime or ( getTotalTimeElapsed() - self.StartTime if self.StartTime else 0 )
+macro Player.getSplit(lastSplit = 0):
+    # TODO Not functional
+    getTotalTimeElapsed() - self.StartTime - lastSplit
+
+macro Number.numberString():
+    f"{floor(self)}.{round(10000 * (self - floor(self)))}" # 10000000
+
+macro line_segmentXsphere(v1, v2, c0, r):
+    # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
+    # Sphere: vect c0 is center, num r is radius
+    # Intersect_Position = v1 + directionTowards(v1, v2) * \
+    [2.0 * dotProduct(vectorTowards(c0, v1), directionTowards(v1, v2))].map(lambda b: -0.5 * (b + sqrt(b * b - 4.0 * (dotProduct(vectorTowards(c0, v1), vectorTowards(c0, v1)) - r * r))))
 
 macro Array.insertAt(index, item):
     self.append(null)
