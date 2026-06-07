@@ -134,8 +134,9 @@ macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
     getTotalTimeElapsed() - self.StartTime - lastSplit
 
-macro Number.numberString():
-    f"{floor(self)}.{round(10000 * (self - floor(self)))}" # 10000000
+macro Number.numberString(precision = 4):
+    # Max Precision 7
+    "{}.{}".format(floor(self), round((self - floor(self)) * 10 ** precision))
 
 macro line_segmentXsphere(v1, v2, c0, r):
     # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
