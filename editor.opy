@@ -21,7 +21,8 @@ rule "Editor | Enable Checkpoint Selection":
 		return
 
 	wait(0.5, Wait.ABORT_WHEN_FALSE)
-
+    eventPlayer.StartTime = 0
+    eventPlayer.StopTime = 0
 	# If there's no checkpoints, create 1 at the player's position
     if len(Checkpoints) == 0:
         Checkpoints[0] = eventPlayer.getPosition()
