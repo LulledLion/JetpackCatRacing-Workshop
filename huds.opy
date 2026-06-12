@@ -29,7 +29,7 @@ rule "HUD Setup":
         localPlayer if not hostPlayer.ShouldShowExportInstructions else null, 
         iconString(Icon.ARROW_RIGHT) if localPlayer.IsRacing else iconString(Icon.FLAG) if localPlayer.CurrentCheckpointIdx == 0 else  iconString(Icon.CHECKMARK) , 
         "{} / {}".format(localPlayer.CurrentCheckpointIdx, len(Checkpoints)-1), 
-        "Time: {}".format(localPlayer.Timer), 
+        "Time: {}".format(localPlayer.CurrentTime), 
         HudPosition.TOP, 
 		EHudOrder.TIMER,
         ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], 
@@ -76,19 +76,19 @@ rule "Remake Leaderboard HUD":
         hudSubtext(getAllPlayers(), "{0} Top 5 {0}".format(abilityIconString(Hero.JETPACK_CAT,Button.SECONDARY_FIRE))
             , HudPosition.RIGHT, EHudOrder.TOP5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
         LeaderboardText.append(getLastCreatedText())
-        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[0][0], LeaderboardEntries[0][1], HudPosition.RIGHT, EHudOrder.TOP5+1, Color.RED, Color.RED, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[0][0], LeaderboardEntries[0][1].numberString(), HudPosition.RIGHT, EHudOrder.TOP5+1, Color.RED, Color.RED, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
         LeaderboardText.append(getLastCreatedText())
         if LeaderboardEntries[1]:
-            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[1][0], LeaderboardEntries[1][1], HudPosition.RIGHT, EHudOrder.TOP5+2, Color.ORANGE, Color.ORANGE, Color.ORANGE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+            hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[1][0], LeaderboardEntries[1][1].numberString(), HudPosition.RIGHT, EHudOrder.TOP5+2, Color.ORANGE, Color.ORANGE, Color.ORANGE, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
             LeaderboardText.append(getLastCreatedText())
             if LeaderboardEntries[2]:
-                hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[2][0], LeaderboardEntries[2][1], HudPosition.RIGHT, EHudOrder.TOP5+3, Color.YELLOW, Color.YELLOW, Color.YELLOW, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[2][0], LeaderboardEntries[2][1].numberString(), HudPosition.RIGHT, EHudOrder.TOP5+3, Color.YELLOW, Color.YELLOW, Color.YELLOW, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
                 LeaderboardText.append(getLastCreatedText())
                 if LeaderboardEntries[3]:
-                    hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[3][0], LeaderboardEntries[3][1], HudPosition.RIGHT, EHudOrder.TOP5+4, Color.LIME_GREEN, Color.LIME_GREEN,Color.LIME_GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                    hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[3][0], LeaderboardEntries[3][1].numberString(), HudPosition.RIGHT, EHudOrder.TOP5+4, Color.LIME_GREEN, Color.LIME_GREEN,Color.LIME_GREEN, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
                     LeaderboardText.append(getLastCreatedText())
                     if LeaderboardEntries[4]:
-                        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[4][0], LeaderboardEntries[4][1], HudPosition.RIGHT, EHudOrder.TOP5+5, Color.GREEN, Color.GREEN, Color.GREEN,HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+                        hudText(getAllPlayers(), heroIcon(Hero.JETPACK_CAT), LeaderboardEntries[4][0], LeaderboardEntries[4][1].numberString(), HudPosition.RIGHT, EHudOrder.TOP5+5, Color.GREEN, Color.GREEN, Color.GREEN,HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
                         LeaderboardText.append(getLastCreatedText())
 
 
