@@ -4,7 +4,7 @@
 
 settings {
     "main": {
-        "description": "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer.\nAdapted by nebula\nOriginal credit to Jashaal and Roeesun.\n\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing",
+        "description": "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer.\nAdapted by nebula\nOriginal credit to Jashaal and Roeesun.\n\nWorkshop website: workshop.codes/TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing",
         "modeName": f"Jetpack Cat Racing {VERSION}"
     },
     "lobby": {
@@ -20,7 +20,8 @@ settings {
         "skirmish": {
         },
 		"tdm": {
-		},
+            "enabledMaps": []
+        },
         "general": {
             "gamemodeStartTrigger": "manual",
             "heroLimit": "off",

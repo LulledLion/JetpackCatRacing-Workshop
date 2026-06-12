@@ -60,9 +60,9 @@ rule "Save previous position":
 
 rule "Arrive at Checkpoint":
     @Event eachPlayer
-    @Condition len(Checkpoints) > 1
     @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
 	@Condition eventPlayer.GoalCheckpoint != null
+    #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
     @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
     @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
 
