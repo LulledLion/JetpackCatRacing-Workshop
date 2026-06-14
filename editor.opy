@@ -21,7 +21,8 @@ rule "Editor | Enable Checkpoint Selection":
 		return
 
 	wait(0.5, Wait.ABORT_WHEN_FALSE)
-
+    eventPlayer.StartTime = 0
+    eventPlayer.StopTime = 0
 	# If there's no checkpoints, create 1 at the player's position
     if len(Checkpoints) == 0:
         Checkpoints[0] = eventPlayer.getPosition()
@@ -34,7 +35,7 @@ rule "Editor | Enable Checkpoint Selection":
     if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
         StartEditorCamera()
 		# stop timer
-		stopChasingVariable(eventPlayer.Timer)
+		#stopChasingVariable(eventPlayer.Timer)
         wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
 	# Exiting edit mode: Stop the camera and continue the timer
@@ -44,12 +45,10 @@ rule "Editor | Enable Checkpoint Selection":
         StopEditorCamera()
 		eventPlayer.IsMovingCheckpoint = false
 		# start timer
-		if len(Checkpoints) > 1:
-			chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
-
-			if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
-				eventPlayer.IsRacing = true
-				
+		#if len(Checkpoints) > 1:
+		#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
+        #if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
+        #    eventPlayer.IsRacing = true
 		eventPlayer.teleport(Checkpoints[eventPlayer.CurrentCheckpointIdx])
 		wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
