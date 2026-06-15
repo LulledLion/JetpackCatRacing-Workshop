@@ -2,7 +2,7 @@
 #!optimizeStrict
 ##!writeToOutputFile
 # settings ###################
-macro VERSION = "1.0.0"
+macro VERSION = "1.1.0"
 macro EDITOR_ON = true
 macro INSPECTOR_ON = false
 #!define JS(content) __script__("js.js")
