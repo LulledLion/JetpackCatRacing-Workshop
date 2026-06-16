@@ -98,12 +98,12 @@ rule "Finish":
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
         # you already have a time
         if eventPlayer.StopTime > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: 
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime))
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
             return # new time worse
-        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.StopTime))
+        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.StopTime.numberString()))
         LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
     else: # you are not in list yet
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime))
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
         if len(LeaderboardEntries) < 25 or eventPlayer.StopTime < LeaderboardEntries[24][1]: # board has room for more or faster than last entry
             del LeaderboardEntries[24]
         else:
@@ -116,7 +116,7 @@ rule "Finish":
         LeaderboardEntries[2][1] > eventPlayer.StopTime or not LeaderboardEntries[2] or
         LeaderboardEntries[3][1] > eventPlayer.StopTime or not LeaderboardEntries[3] or
         LeaderboardEntries[4][1] > eventPlayer.StopTime or not LeaderboardEntries[4]):
-        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.StopTime, eventPlayer))
+        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.StopTime.numberString(), eventPlayer))
     
     LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.StopTime]] )
     LeaderboardRemake = true
