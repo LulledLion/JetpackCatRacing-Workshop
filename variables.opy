@@ -137,7 +137,7 @@ macro Float.numberString(precision = 4, truncate = 2):
     "{}.{}".format(floor(self), round((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 1 else
     "{}.{}".format(floor(self), ceil((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 2 else self)
 
-macro Player.CurrentTime = self.StopTime.numberString() or ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
+macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
     getTotalTimeElapsed() - self.StartTime - lastSplit
