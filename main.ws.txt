@@ -2,8 +2,8 @@ settings
 {
 	main
 	{
-		Description: "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer.\nAdapted by nebula\nOriginal credit to Jashaal and Roeesun.\n\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing"
-		Mode Name: "Jetpack Cat Racing 1.0.0"
+		Description: "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer and lulledlion.\nAdapted by nebula\nOriginal credit to Jashaal and Roeesun.\n\nWorkshop website: workshop.codes/TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing"
+		Mode Name: "Jetpack Cat Racing 1.1.0"
 	}
 	lobby
 	{
@@ -22,6 +22,9 @@ settings
 		}
 		Team Deathmatch
 		{
+			enabled maps
+			{
+			}
 		}
 		General
 		{
@@ -59,11 +62,11 @@ settings
 variables {
     global:
         0: Checkpoints
+        1: ServerTimeElapsed
         10: RingSize
         20: CreatorName
         21: MapCode
         22: ColorConfig
-        23: GoalText
         50: RestartLobbyTime
         60: LeaderboardText
         61: LeaderboardEntries
@@ -73,20 +76,23 @@ variables {
     player:
         0: WsEditorOn
         1: CurrentEditorMode
-        2: Timer
-        3: PersonalBest
-        4: IsRacing
-        5: SpeedMultiplier
-        6: CurrentCheckpointIdx
-        7: GoalCheckpoint
-        8: AfterNextCheckpoint
-        9: CurrentCheckpoint
-        10: ActivelyEditing
-        11: EditCheckpointEffect
-        12: EditCheckpointTemp
-        13: EditMeleeButtonPressed
-        14: IsMovingCheckpoint
-        15: ShouldShowExportInstructions
+        2: StartTime
+        3: StopTime
+        4: PersonalBest
+        5: OldPosition
+        6: CurrentPosition
+        7: IsRacing
+        8: SpeedMultiplier
+        9: CurrentCheckpointIdx
+        10: GoalCheckpoint
+        11: AfterNextCheckpoint
+        12: CurrentCheckpoint
+        13: ActivelyEditing
+        14: EditCheckpointEffect
+        15: EditCheckpointTemp
+        16: EditMeleeButtonPressed
+        17: IsMovingCheckpoint
+        18: ShouldShowExportInstructions
 }
 
 subroutines {
@@ -263,8 +269,12 @@ rule ("Init Global") {
         Disable Built-In Game Mode Announcer;
         Disable Built-In Game Mode Completion;
         Disable Built-In Game Mode Scoring;
-        Wait(1, Ignore Condition);
         Set Global Variable(RestartLobbyTime, Subtract(Add(Multiply(Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1), 999999999999), Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart Lobby After X minutes"), 15, 1, 60, 0)), 1));
+        Wait(1, Ignore Condition);
+        Start Forcing Spawn Room(All Teams, 0);
+        Start Forcing Spawn Room(All Teams, 1);
+        Start Forcing Spawn Room(All Teams, 2);
+        Stop Forcing Spawn Room(All Teams);
         Set Global Variable(LeaderboardText, Null);
         Set Global Variable(LeaderboardEntries, Empty Array);
         Set Global Variable(LeaderboardRemake, Null);
@@ -293,12 +303,21 @@ rule ("Init Player") {
         Disable Movement Collision With Players(Event Player);
         Set Ability 1 Enabled(Event Player, False);
         Set Status(Event Player, Null, Invincible, 999999);
-        Set Player Variable(Event Player, GoalCheckpoint, Vector(0, -100, 0));
-        Wait(0.612, Ignore Condition);
-        Set Player Variable(Event Player, PersonalBest, Null);
         "map variables need to load first"
-        Wait Until(Compare(Total Time Elapsed, >, 1), 1);
+        Wait Until(Compare(Total Time Elapsed, >, 0.528), 0.528);
+        Wait(0.128, Ignore Condition);
         Call Subroutine(FullReset);
+    }
+}
+
+rule ("Server Time Elapsed") {
+    event {
+        Ongoing - Global;
+    }
+    actions {
+        Set Global Variable(ServerTimeElapsed, Total Time Elapsed);
+        Wait(0, Ignore Condition);
+        Loop;
     }
 }
 
@@ -315,6 +334,40 @@ rule ("After 3s if the checkpoints are empty then provide a warning") {
     }
 }
 
+rule ("Addon | Little Destructo - Fence Breaker") {
+    event {
+        Ongoing - Global;
+    }
+    actions {
+        "Made by FishoFire version 1.1\nwait to overwrite any from copy pastas"
+        Wait(0.032, Ignore Condition);
+        "tdm/dm = first spawn points, the maps are not big so it just covers entire map. all teams defaults to team 1 spawn\npush: payload and cp 0 are set but rest isnt. normal payload maps have more then 1 point.\nrest of maps have up to 3 points"
+        Modify Global Variable(MapVectorArray, Append To Array, If-Then-Else(Compare(Current Game Mode, ==, Game Mode(Capture The Flag)), Array(Flag Position(Team 1), Flag Position(Team 2)), If-Then-Else(Array Contains(Array(Game Mode(Team Deathmatch), Game Mode(Deathmatch)), Current Game Mode), First Of(Spawn Points(All Teams)), If-Then-Else(And(First Of(Payload Position), Not(Add(Objective Position(1), Objective Position(2)))), Payload Position, Array(Objective Position(0), Objective Position(1), Objective Position(2))))));
+        "explode in a grid around the selected points"
+        While(Compare(Count Of(Global.MapVectorArray), >, 1));
+            Set Global Variable At Index(MapVectorArray, 0, 0);
+            While(Compare(First Of(Global.MapVectorArray), <, 256));
+                Create Projectile(Orb Projectile, Null, Add(Value In Array(Global.MapVectorArray, 1), Multiply(30, Vector(Subtract(Modulo(First Of(Global.MapVectorArray), 16), 8), 0, Subtract(Round To Integer(Divide(First Of(Global.MapVectorArray), 16), Down), 8)))), Down, To World, Heal, Team 1, 0, 0, 30, Good Explosion, Explosion Sound, 1, 1, 0, 0, 0, 0);
+                Modify Global Variable At Index(MapVectorArray, 0, Add, 1);
+                "use modulo to only wait every x orbs keep the 0 change the other number"
+                If(Not(Modulo(First Of(Global.MapVectorArray), 3)));
+                    Wait(0, Ignore Condition);
+                End;
+            End;
+            Modify Global Variable(MapVectorArray, Remove From Array By Index, 1);
+        End;
+        "handle exceptions (looking at you new queen street)"
+        Set Global Variable(MapVectorArray, Array(Vector(8.276, 4.113, 15.261), Vector(-8.319, 2.624, 14.245), Vector(0, 4.821, 18.513)));
+        While(Count Of(Global.MapVectorArray));
+            "same as other projectile before"
+            Create Projectile(Orb Projectile, Null, First Of(Global.MapVectorArray), Down, To World, Heal, Team 1, 0, 0, 30, Good Explosion, Explosion Sound, 1, 1, 0, 0, 0, 0);
+            Modify Global Variable(MapVectorArray, Remove From Array By Index, 0);
+            Wait(0, Ignore Condition);
+        End;
+        Set Global Variable(MapVectorArray, Null);
+    }
+}
+
 rule ("HUD Setup") {
     event {
         Ongoing - Global;
@@ -324,7 +377,7 @@ rule ("HUD Setup") {
         Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), Custom String("Made By: {0}                                                                                                    ", Global.CreatorName), Custom String("Map Code: {0}                                                                                                    ", Global.MapCode), Left, 9, Color(Sky Blue), First Of(Global.ColorConfig), Value In Array(Global.ColorConfig, 1), Visible To, Default Visibility);
         Create HUD Text(First Of(True), Null, Custom String("Discord: dsc.gg/jetpack                                                                                                    "), Null, Left, 10, Null, Value In Array(Global.ColorConfig, 2), Null, Visible To, Default Visibility);
         Create HUD Text(If-Then-Else(Compare((Local Player).CurrentEditorMode, ==, 0), All Players(All Teams), Null), Null, Null, Custom String("Press [{0}]: Quick reset\nHold [{0}]: full restart\n", Input Binding String(Button(Reload))), Right, 15, Null, Null, Value In Array(Global.ColorConfig, 3), Visible To and String, Default Visibility);
-        Create HUD Text(If-Then-Else((Host Player).ShouldShowExportInstructions, Null, Local Player), If-Then-Else((Local Player).IsRacing, Icon String(Arrow: Right), If-Then-Else(Compare((Local Player).CurrentCheckpointIdx, ==, 0), Icon String(Flag), Icon String(Checkmark))), Custom String("{0} / {1}", (Local Player).CurrentCheckpointIdx, Subtract(Count Of(Global.Checkpoints), 1)), Custom String("Time: {0}", (Local Player).Timer), Top, 0, Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
+        Create HUD Text(If-Then-Else((Host Player).ShouldShowExportInstructions, Null, Local Player), If-Then-Else((Local Player).IsRacing, Icon String(Arrow: Right), If-Then-Else(Compare((Local Player).CurrentCheckpointIdx, ==, 0), Icon String(Flag), Icon String(Checkmark))), Custom String("{0} / {1}", (Local Player).CurrentCheckpointIdx, Subtract(Count Of(Global.Checkpoints), 1)), Custom String("Time: {0}", Or((Local Player).StopTime, If-Then-Else((Local Player).StartTime, Subtract(Global.ServerTimeElapsed, (Local Player).StartTime), 0))), Top, 0, Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
         Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: x{1}                                                                                                    ", Icon String(Bolt), Divide((Local Player).SpeedMultiplier, 100))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
         Create HUD Text(If-Then-Else((Local Player).PersonalBest, Local Player, Null), Null, Custom String("{0} Personal best: {1}", Ability Icon String(Hero(Jetpack Cat), Button(Ability 2)), (Local Player).PersonalBest), Null, Right, 16, Null, Value In Array(Global.ColorConfig, 9), Null, Visible To Sort Order String and Color, Default Visibility);
     }
@@ -362,19 +415,19 @@ rule ("Remake Leaderboard HUD") {
         If(First Of(Global.LeaderboardEntries));
             Create HUD Text(All Players(All Teams), Null, Null, Custom String("{0} Top 5 {0}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire))), Right, 17, Null, Null, Color(White), Visible To and String, Default Visibility);
             Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
-            Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(First Of(Global.LeaderboardEntries)), Value In Array(First Of(Global.LeaderboardEntries), 1), Right, 18, Color(Red), Color(Red), Color(Red), Visible To, Default Visibility);
+            Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(First Of(Global.LeaderboardEntries)), Custom String("{0}.{1}", Round To Integer(Value In Array(First Of(Global.LeaderboardEntries), 1), Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, Value In Array(First Of(Global.LeaderboardEntries), 1)), Round To Integer(Value In Array(First Of(Global.LeaderboardEntries), 1), Down)), 10000), Up)), 1, 4)), Right, 18, Color(Red), Color(Red), Color(Red), Visible To, Default Visibility);
             Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
             If(Value In Array(Global.LeaderboardEntries, 1));
-                Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 1)), Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), Right, 19, Color(Orange), Color(Orange), Color(Orange), Visible To, Default Visibility);
+                Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 1)), Custom String("{0}.{1}", Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1)), Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), Down)), 10000), Up)), 1, 4)), Right, 19, Color(Orange), Color(Orange), Color(Orange), Visible To, Default Visibility);
                 Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
                 If(Value In Array(Global.LeaderboardEntries, 2));
-                    Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 2)), Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), Right, 20, Color(Yellow), Color(Yellow), Color(Yellow), Visible To, Default Visibility);
+                    Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 2)), Custom String("{0}.{1}", Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1)), Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), Down)), 10000), Up)), 1, 4)), Right, 20, Color(Yellow), Color(Yellow), Color(Yellow), Visible To, Default Visibility);
                     Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
                     If(Value In Array(Global.LeaderboardEntries, 3));
-                        Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 3)), Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), Right, 21, Color(Lime Green), Color(Lime Green), Color(Lime Green), Visible To, Default Visibility);
+                        Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 3)), Custom String("{0}.{1}", Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1)), Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), Down)), 10000), Up)), 1, 4)), Right, 21, Color(Lime Green), Color(Lime Green), Color(Lime Green), Visible To, Default Visibility);
                         Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
                         If(Value In Array(Global.LeaderboardEntries, 4));
-                            Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 4)), Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), Right, 22, Color(Green), Color(Green), Color(Green), Visible To, Default Visibility);
+                            Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Jetpack Cat)), First Of(Value In Array(Global.LeaderboardEntries, 4)), Custom String("{0}.{1}", Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1)), Round To Integer(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), Down)), 10000), Up)), 1, 4)), Right, 22, Color(Green), Color(Green), Color(Green), Visible To, Default Visibility);
                             Modify Global Variable(LeaderboardText, Append To Array, Last Text ID);
     }
 }
@@ -442,7 +495,6 @@ rule ("Subroutine GoToResetPoint") {
             Respawn(Event Player);
             Abort;
         End;
-        "$$ Teleport Unnecessary"
         Teleport(Event Player, (Event Player).CurrentCheckpoint);
         Start Forcing Player Position(Event Player, (Event Player).CurrentCheckpoint, True);
         Wait(0.016, Ignore Condition);
@@ -459,68 +511,34 @@ rule ("Subroutine FullReset") {
         FullReset;
     }
     actions {
-        Stop Chasing Player Variable(Event Player, Timer);
+        "stopChasingVariable(eventPlayer.Timer)"
         Set Player Variable(Event Player, CurrentCheckpointIdx, 0);
         Call Subroutine(SetCheckpoints);
-        Set Player Variable(Event Player, Timer, 0);
+        "eventPlayer.Timer = 0"
+        Set Player Variable(Event Player, StartTime, 0);
+        Set Player Variable(Event Player, StopTime, 0);
         Set Player Variable(Event Player, IsRacing, False);
         "CurrentCheckpoint is first reset so this works"
         Call Subroutine(GoToResetPoint);
         Call Subroutine(ResetSpeed);
-        Wait Until(And(Is Moving(Event Player), Compare((Event Player).CurrentEditorMode, ==, 0)), 99999);
-        If(Compare(Count Of(Global.Checkpoints), >, 1));
-            Chase Player Variable At Rate(Event Player, Timer, 999999999999, 1, Destination and Rate);
-        End;
+        Wait Until(And(Is Moving(Event Player), Compare((Event Player).CurrentEditorMode, ==, 0)), 999999999999);
         Set Player Variable(Event Player, IsRacing, True);
+        Abort If(Compare(Count Of(Global.Checkpoints), <=, 1));
+        Set Player Variable(Event Player, StartTime, Total Time Elapsed);
     }
 }
 
-rule ("Finish") {
+rule ("Save previous position") {
     event {
-        Ongoing - Each Player;
+        Player Joined Match;
         All;
         All;
-    }
-    conditions {
-        (Event Player).GoalCheckpoint == Null;
-        (Event Player).CurrentEditorMode == 0;
-        Count Of(Global.Checkpoints) > 1;
-        (Event Player).CurrentCheckpointIdx == Subtract(Count Of(Global.Checkpoints), 1);
-        Is Alive(Event Player) == True;
     }
     actions {
-        Set Player Variable(Event Player, IsRacing, False);
-        Stop Chasing Player Variable(Event Player, Timer);
-        "Don't record editor times"
-        Abort If((Event Player).WsEditorOn);
-        If(Array Contains(Mapped Array(Global.LeaderboardEntries, First Of(Current Array Element)), Custom String("{0}", Event Player)));
-            "you already have a time"
-            If(Compare((Event Player).Timer, >, Value In Array(First Of(Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player)))), 1)));
-                Big Message(Event Player, Custom String("Completion time: {0}", (Event Player).Timer));
-                "new time worse"
-                Abort;
-            End;
-            Big Message(Event Player, Custom String("New personal best: {0}", (Event Player).Timer));
-            Modify Global Variable(LeaderboardEntries, Remove From Array By Value, Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player))));
-            Set Player Variable(Event Player, PersonalBest, (Event Player).Timer);
-        "you are not in list yet"
-        Else;
-            Set Player Variable(Event Player, PersonalBest, (Event Player).Timer);
-            Big Message(Event Player, Custom String("Completion time: {0}", (Event Player).Timer));
-            "board has room for more or faster than last entry"
-            If(Or(Compare(Count Of(Global.LeaderboardEntries), <, 25), Compare((Event Player).Timer, <, Value In Array(Value In Array(Global.LeaderboardEntries, 24), 1))));
-                Modify Global Variable(LeaderboardEntries, Remove From Array By Index, 24);
-            Else;
-                "your time lower than last entry"
-                Abort;
-            End;
-        End;
-        "new top 5 if faster or entry doesnt exist yet"
-        If(Or(Or(Or(Or(Or(Or(Or(Or(Or(Compare(Value In Array(First Of(Global.LeaderboardEntries), 1), >, (Event Player).Timer), Not(First Of(Global.LeaderboardEntries))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 1))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 2))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 3))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), >, (Event Player).Timer)), Not(Value In Array(Global.LeaderboardEntries, 4))));
-            Big Message(All Players(All Teams), Custom String("New top 5 time: {0} by {1}!", (Event Player).Timer, Event Player));
-        End;
-        Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).Timer)));
-        Set Global Variable(LeaderboardRemake, True);
+        Set Player Variable(Event Player, OldPosition, (Event Player).CurrentPosition);
+        Set Player Variable(Event Player, CurrentPosition, Position Of(Event Player));
+        Wait(0, Ignore Condition);
+        Loop;
     }
 }
 
@@ -531,13 +549,12 @@ rule ("Arrive at Checkpoint") {
         All;
     }
     conditions {
+        (Event Player).CurrentEditorMode == 0;
         (Event Player).GoalCheckpoint != Null;
-        "2.65"
-        Distance Between((Event Player).GoalCheckpoint, Eye Position(Event Player)) <= Global.RingSize;
         Is Alive(Event Player) == True;
         (Event Player).IsRacing != False;
-        (Event Player).CurrentEditorMode == 0;
-        Count Of(Global.Checkpoints) > 1;
+        "2.65"
+        Distance Between((Event Player).GoalCheckpoint, Update Every Frame(Eye Position(Event Player))) <= Global.RingSize;
     }
     actions {
         "TODO: Separate starting the level vs arriving at a checkpoint IN the level?"
@@ -546,6 +563,57 @@ rule ("Arrive at Checkpoint") {
         Modify Player Variable(Event Player, SpeedMultiplier, Add, 3);
         Modify Player Variable(Event Player, CurrentCheckpointIdx, Add, 1);
         Call Subroutine(SetCheckpoints);
+    }
+}
+
+rule ("Finish") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        (Event Player).CurrentEditorMode == 0;
+        Count Of(Global.Checkpoints) > 1;
+        (Event Player).GoalCheckpoint == Null;
+        (Event Player).CurrentCheckpointIdx == Subtract(Count Of(Global.Checkpoints), 1);
+    }
+    actions {
+        "@Condition eventPlayer.isAlive()\nstopChasingVariable(eventPlayer.Timer)"
+        Set Player Variable(Event Player, IsRacing, False);
+        Set Player Variable(Event Player, StopTime, Total Time Elapsed);
+        Modify Player Variable(Event Player, StopTime, Subtract, (Event Player).StartTime);
+        Modify Player Variable(Event Player, StopTime, Subtract, 0.016);
+        Modify Player Variable(Event Player, StopTime, Add, Multiply(0.016, Max(0, Min(1, Divide(Mapped Array(Array(Multiply(2.0, Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).OldPosition), Direction Towards((Event Player).OldPosition, (Event Player).CurrentPosition)))), Multiply(-0.5, Add(Current Array Element, Square Root(Subtract(Multiply(Current Array Element, Current Array Element), Multiply(4.0, Subtract(Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).OldPosition), Vector Towards(Last Of(Global.Checkpoints), (Event Player).OldPosition)), Multiply(Global.RingSize, Global.RingSize)))))))), Distance Between((Event Player).OldPosition, (Event Player).CurrentPosition))))));
+        "Don't record editor times"
+        Abort If((Event Player).WsEditorOn);
+        If(Array Contains(Mapped Array(Global.LeaderboardEntries, First Of(Current Array Element)), Custom String("{0}", Event Player)));
+            "you already have a time"
+            If(Compare((Event Player).StopTime, >, Value In Array(First Of(Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player)))), 1)));
+                Big Message(Event Player, Custom String("Completion time: {0}.{1}", Round To Integer((Event Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Event Player).StopTime), Round To Integer((Event Player).StopTime, Down)), 10000), Up)), 1, 4)));
+                "new time worse"
+                Abort;
+            End;
+            Big Message(Event Player, Custom String("New personal best: {0}.{1}", Round To Integer((Event Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Event Player).StopTime), Round To Integer((Event Player).StopTime, Down)), 10000), Up)), 1, 4)));
+            Modify Global Variable(LeaderboardEntries, Remove From Array By Value, Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player))));
+        "you are not in list yet"
+        Else;
+            Big Message(Event Player, Custom String("Completion time: {0}.{1}", Round To Integer((Event Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Event Player).StopTime), Round To Integer((Event Player).StopTime, Down)), 10000), Up)), 1, 4)));
+            "board has room for more or faster than last entry"
+            If(Or(Compare(Count Of(Global.LeaderboardEntries), <, 25), Compare((Event Player).StopTime, <, Value In Array(Value In Array(Global.LeaderboardEntries, 24), 1))));
+                Modify Global Variable(LeaderboardEntries, Remove From Array By Index, 24);
+            Else;
+                "your time lower than last entry"
+                Abort;
+            End;
+        End;
+        Set Player Variable(Event Player, PersonalBest, Custom String("{0}.{1}", Round To Integer((Event Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Event Player).StopTime), Round To Integer((Event Player).StopTime, Down)), 10000), Up)), 1, 4)));
+        "new top 5 if faster or entry doesnt exist yet"
+        If(Or(Or(Or(Or(Or(Or(Or(Or(Or(Compare(Value In Array(First Of(Global.LeaderboardEntries), 1), >, (Event Player).StopTime), Not(First Of(Global.LeaderboardEntries))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 1), 1), >, (Event Player).StopTime)), Not(Value In Array(Global.LeaderboardEntries, 1))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 2), 1), >, (Event Player).StopTime)), Not(Value In Array(Global.LeaderboardEntries, 2))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 3), 1), >, (Event Player).StopTime)), Not(Value In Array(Global.LeaderboardEntries, 3))), Compare(Value In Array(Value In Array(Global.LeaderboardEntries, 4), 1), >, (Event Player).StopTime)), Not(Value In Array(Global.LeaderboardEntries, 4))));
+            Big Message(All Players(All Teams), Custom String("New top 5 time: {0}.{1} by {2}!", Round To Integer((Event Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Event Player).StopTime), Round To Integer((Event Player).StopTime, Down)), 10000), Up)), 1, 4), Event Player));
+        End;
+        Modify Global Variable(LeaderboardEntries, Append To Array, Array(Array(Custom String("{0}", Event Player), (Event Player).StopTime)));
+        Set Global Variable(LeaderboardRemake, True);
     }
 }
 
@@ -563,8 +631,11 @@ rule ("Reset - Single Checkpoint") {
     actions {
         Wait Until(Not(Is Button Held(Event Player, Button(Reload))), 0.3);
         Abort If(Is Button Held(Event Player, Button(Reload)));
-        Call Subroutine(GoToResetPoint);
-        Call Subroutine(ResetSpeed);
+        If((Event Player).CurrentCheckpointIdx);
+            Call Subroutine(GoToResetPoint);
+            Call Subroutine(ResetSpeed);
+        Else;
+            Call Subroutine(FullReset);
     }
 }
 
@@ -595,40 +666,6 @@ rule ("Handle Death") {
         Respawn(Event Player);
         Call Subroutine(GoToResetPoint);
         Call Subroutine(ResetSpeed);
-    }
-}
-
-rule ("Addon | Little Destructo - Fence Breaker") {
-    event {
-        Ongoing - Global;
-    }
-    actions {
-        "Made by FishoFire version 1.0\nwait to overwrite any from copy pastas"
-        Wait(0.032, Ignore Condition);
-        "tdm/dm = first spawn points, the maps are not big so it just covers entire map. all teams defaults to team 1 spawn\npush: payload and cp 0 are set but rest isnt. normal payload maps have more then 1 point.\nrest of maps have up to 3 points"
-        Modify Global Variable(MapVectorArray, Append To Array, If-Then-Else(Compare(Current Game Mode, ==, Game Mode(Capture The Flag)), Array(Flag Position(Team 1), Flag Position(Team 2)), If-Then-Else(Array Contains(Array(Game Mode(Team Deathmatch), Game Mode(Deathmatch)), Current Game Mode), First Of(Spawn Points(All Teams)), If-Then-Else(And(First Of(Payload Position), Not(Add(Objective Position(1), Objective Position(2)))), Payload Position, Array(Objective Position(0), Objective Position(1), Objective Position(2))))));
-        "explode in a grid around the selected points"
-        While(Compare(Count Of(Global.MapVectorArray), >, 1));
-            Set Global Variable At Index(MapVectorArray, 0, 0);
-            While(Compare(First Of(Global.MapVectorArray), <, 256));
-                Create Projectile(Orb Projectile, Null, Add(Value In Array(Global.MapVectorArray, 1), Multiply(30, Vector(Subtract(Modulo(First Of(Global.MapVectorArray), 16), 8), 0, Subtract(Round To Integer(Divide(First Of(Global.MapVectorArray), 16), Down), 8)))), Down, To World, Heal, Team 1, 0, 0, 30, Good Explosion, Explosion Sound, 1, 1, 0, 0, 0, 0);
-                Modify Global Variable At Index(MapVectorArray, 0, Add, 1);
-                "use modulo to only wait every x orbs keep the 0 change the other number"
-                If(Not(Modulo(First Of(Global.MapVectorArray), 3)));
-                    Wait(0, Ignore Condition);
-                End;
-            End;
-            Modify Global Variable(MapVectorArray, Remove From Array By Index, 1);
-        End;
-        "handle exceptions (looking at you new queen street)"
-        Set Global Variable(MapVectorArray, Array(Vector(8.276, 4.113, 15.261), Vector(-8.319, 2.624, 14.245), Vector(0, 4.821, 18.513)));
-        While(Count Of(Global.MapVectorArray));
-            "same as other projectile before"
-            Create Projectile(Orb Projectile, Null, First Of(Global.MapVectorArray), Down, To World, Heal, Team 1, 0, 0, 30, Good Explosion, Explosion Sound, 1, 1, 0, 0, 0, 0);
-            Modify Global Variable(MapVectorArray, Remove From Array By Index, 0);
-            Wait(0, Ignore Condition);
-        End;
-        Set Global Variable(MapVectorArray, Null);
     }
 }
 
@@ -696,6 +733,8 @@ rule ("Editor | Enable Checkpoint Selection") {
             Abort;
         End;
         Wait(0.5, Abort When False);
+        Set Player Variable(Event Player, StartTime, 0);
+        Set Player Variable(Event Player, StopTime, 0);
         "If there's no checkpoints, create 1 at the player's position"
         If(Compare(Count Of(Global.Checkpoints), ==, 0));
             Set Global Variable At Index(Checkpoints, 0, Position Of(Event Player));
@@ -706,8 +745,7 @@ rule ("Editor | Enable Checkpoint Selection") {
         "Entering edit mode: Start the camera and stop the timer"
         If(Compare((Event Player).CurrentEditorMode, >, 0));
             Call Subroutine(StartEditorCamera);
-            "stop timer"
-            Stop Chasing Player Variable(Event Player, Timer);
+            "stop timer\nstopChasingVariable(eventPlayer.Timer)"
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Buff Explosion Sound, Color(White), Value In Array(Global.Checkpoints, (Host Player).CurrentCheckpointIdx), 100);
         "Exiting edit mode: Stop the camera and continue the timer"
@@ -716,10 +754,8 @@ rule ("Editor | Enable Checkpoint Selection") {
             Destroy Effect((Event Player).EditCheckpointEffect);
             Call Subroutine(StopEditorCamera);
             Set Player Variable(Event Player, IsMovingCheckpoint, False);
-            "start timer"
-            If(Compare(Count Of(Global.Checkpoints), >, 1));
-                Chase Player Variable At Rate(Event Player, Timer, 999999999999, 1, Destination and Rate);
-            End;
+            "start timer\nif len(Checkpoints) > 1:\nchaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)\nif eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:\neventPlayer.IsRacing = true"
+            Teleport(Event Player, Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx));
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Ring Explosion Sound, Color(White), Position Of(Host Player), 100);
     }
