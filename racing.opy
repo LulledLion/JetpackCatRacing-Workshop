@@ -64,7 +64,7 @@ rule "Arrive at Checkpoint":
 	@Condition eventPlayer.GoalCheckpoint != null
     #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
     @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
-    @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
+    @Condition distance(eventPlayer.GoalCheckpoint, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
     # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
@@ -79,19 +79,19 @@ rule "Arrive at Checkpoint":
 
 rule "Finish":
     @Event eachPlayer
-    @Condition eventPlayer.GoalCheckpoint == null
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition len(Checkpoints) > 1
+    @Condition eventPlayer.GoalCheckpoint == null
     @Condition eventPlayer.CurrentCheckpointIdx == len(Checkpoints) - 1 
-    @Condition eventPlayer.isAlive()
+    #@Condition eventPlayer.isAlive()
     #stopChasingVariable(eventPlayer.Timer)
     eventPlayer.IsRacing = false
     eventPlayer.StopTime = getTotalTimeElapsed()
     eventPlayer.StopTime -= eventPlayer.StartTime
     eventPlayer.StopTime -= 0.016
     eventPlayer.StopTime += (0.016
-        * line_segmentXsphere(eventPlayer.OldPosition, eventPlayer.CurrentPosition, Checkpoints.last(), RingSize)
-        / distance(eventPlayer.OldPosition, eventPlayer.CurrentPosition))
+        * max(0, min(1, line_segmentXsphere(eventPlayer.OldPosition, eventPlayer.CurrentPosition, Checkpoints.last(), RingSize)
+        / distance(eventPlayer.OldPosition, eventPlayer.CurrentPosition))))
 	if eventPlayer.WsEditorOn: # Don't record editor times
 		return
 
