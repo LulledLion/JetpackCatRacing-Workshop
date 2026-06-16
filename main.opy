@@ -6,7 +6,7 @@
 #!suppressWarnings w_enum_constant
 #!suppressWarnings w_dark_color
 # settings ###################
-macro VERSION = "1.1.0"
+macro VERSION = "1.1.1"
 macro EDITOR_ON = true
 macro INSPECTOR_ON = false
 #!define JS(content) __script__("js.js")
