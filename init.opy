@@ -49,6 +49,12 @@ rule "Init Player":
     FullReset()
 
 
+rule "Server Time Elapsed":
+    ServerTimeElapsed = getTotalTimeElapsed()
+    wait(0)
+    loop
+
+
 
 rule "After 3s if the checkpoints are empty then provide a warning":
     @Condition getTotalTimeElapsed() > ELoadOrder.MISSING_DATA

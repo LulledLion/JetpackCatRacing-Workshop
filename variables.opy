@@ -129,7 +129,7 @@ enum EEditorMode:
     INSERT = 3,
     REMOVE = 4,
 
-macro Player.CurrentTime = self.StopTime or ( getTotalTimeElapsed() - self.StartTime if self.StartTime else 0 )
+macro Player.CurrentTime = self.StopTime or ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
     getTotalTimeElapsed() - self.StartTime - lastSplit
