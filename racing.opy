@@ -64,7 +64,7 @@ rule "Arrive at Checkpoint":
 	@Condition eventPlayer.GoalCheckpoint != null
     #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
     @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
-    @Condition distance(eventPlayer.GoalCheckpoint, eventPlayer.getEyePosition()) <= RingSize #2.65
+    @Condition distance(eventPlayer.GoalCheckpoint, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
     # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
@@ -79,31 +79,31 @@ rule "Arrive at Checkpoint":
 
 rule "Finish":
     @Event eachPlayer
-    @Condition eventPlayer.GoalCheckpoint == null
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
     @Condition len(Checkpoints) > 1
+    @Condition eventPlayer.GoalCheckpoint == null
     @Condition eventPlayer.CurrentCheckpointIdx == len(Checkpoints) - 1 
-    @Condition eventPlayer.isAlive()
+    #@Condition eventPlayer.isAlive()
     #stopChasingVariable(eventPlayer.Timer)
     eventPlayer.IsRacing = false
     eventPlayer.StopTime = getTotalTimeElapsed()
     eventPlayer.StopTime -= eventPlayer.StartTime
     eventPlayer.StopTime -= 0.016
     eventPlayer.StopTime += (0.016
-        * line_segmentXsphere(eventPlayer.OldPosition, eventPlayer.CurrentPosition, Checkpoints.last(), RingSize)
-        / distance(eventPlayer.OldPosition, eventPlayer.CurrentPosition))
+        * max(0, min(1, line_segmentXsphere(eventPlayer.OldPosition, eventPlayer.CurrentPosition, Checkpoints.last(), RingSize)
+        / distance(eventPlayer.OldPosition, eventPlayer.CurrentPosition))))
 	if eventPlayer.WsEditorOn: # Don't record editor times
 		return
 
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
         # you already have a time
         if eventPlayer.StopTime > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: 
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime))
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
             return # new time worse
-        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.StopTime))
+        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.StopTime.numberString()))
         LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
     else: # you are not in list yet
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime))
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
         if len(LeaderboardEntries) < 25 or eventPlayer.StopTime < LeaderboardEntries[24][1]: # board has room for more or faster than last entry
             del LeaderboardEntries[24]
         else:
@@ -116,7 +116,7 @@ rule "Finish":
         LeaderboardEntries[2][1] > eventPlayer.StopTime or not LeaderboardEntries[2] or
         LeaderboardEntries[3][1] > eventPlayer.StopTime or not LeaderboardEntries[3] or
         LeaderboardEntries[4][1] > eventPlayer.StopTime or not LeaderboardEntries[4]):
-        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.StopTime, eventPlayer))
+        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.StopTime.numberString(), eventPlayer))
     
     LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.StopTime]] )
     LeaderboardRemake = true

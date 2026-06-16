@@ -14,6 +14,7 @@ globalvar ColorConfig 22
 # Workshop Settings
 globalvar RestartLobbyTime 50
 # globalvar InfiniteLobbyTime 51 #$$ Remove
+globalvar ServerTimeElapsed
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
@@ -129,14 +130,17 @@ enum EEditorMode:
     INSERT = 3,
     REMOVE = 4,
 
-macro Player.CurrentTime = self.StopTime or ( getTotalTimeElapsed() - self.StartTime if self.StartTime else 0 )
+macro Float.numberString(precision = 4, truncate = 2):
+    # Max Precision 7
+    # Truncate: 0=Floor 1=Round 2=Ceil
+    ("{}.{}".format(floor(self), ((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 0 else
+    "{}.{}".format(floor(self), round((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 1 else
+    "{}.{}".format(floor(self), ceil((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 2 else self)
+
+macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
     getTotalTimeElapsed() - self.StartTime - lastSplit
-
-macro Number.numberString(precision = 4):
-    # Max Precision 7
-    "{}.{}".format(floor(self), round((self - floor(self)) * 10 ** precision))
 
 macro line_segmentXsphere(v1, v2, c0, r):
     # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
