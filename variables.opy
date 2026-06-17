@@ -51,7 +51,6 @@ playervar ShouldShowExportInstructions
 # Subroutines
 subroutine FullReset
 subroutine GoToResetPoint # teleport back to lastpoint
-subroutine ResetSpeed
 subroutine StartEditorCamera
 subroutine StartEditorCamera2
 subroutine StopEditorCamera

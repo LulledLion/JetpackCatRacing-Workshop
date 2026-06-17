@@ -6,10 +6,7 @@ def SetCheckpoints():
     eventPlayer.AfterNextCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 2]
 
 
-#$$ Combine into GoToResetPoint()
-def ResetSpeed(): 
-    eventPlayer.setMoveSpeed(100)
-    eventPlayer.SpeedMultiplier = 100
+    
 
 
 
@@ -18,7 +15,8 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 	if eventPlayer.CurrentCheckpoint == null:
 		eventPlayer.respawn()
 		return
-    
+    eventPlayer.SpeedMultiplier = 100
+    eventPlayer.setMoveSpeed(100)
     eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
     eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
     wait()
@@ -37,7 +35,6 @@ def FullReset():
     eventPlayer.StopTime = 0
     eventPlayer.IsRacing = false
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
-    ResetSpeed()
 
     waitUntil(eventPlayer.isMoving() and eventPlayer.CurrentEditorMode == EEditorMode.OFF, Math.INFINITY)
     eventPlayer.IsRacing = true
@@ -134,7 +131,6 @@ rule "Reset - Single Checkpoint":
         return
     if eventPlayer.CurrentCheckpointIdx:
         GoToResetPoint()
-        ResetSpeed()
     else:
         FullReset()
 
@@ -155,7 +151,6 @@ rule "Handle Death":
     @Event playerDied
     eventPlayer.respawn()
     GoToResetPoint()
-    ResetSpeed()
 
 
 
