@@ -131,11 +131,13 @@ enum EEditorMode:
     REMOVE = 4,
 
 macro Float.numberString(precision = 4, truncate = 2):
-    # Max Precision 7
+    # Precision: Min 3 Max 7
     # Truncate: 0=Floor 1=Round 2=Ceil
-    ("{}.{}".format(floor(self), ((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 0 else
-    "{}.{}".format(floor(self), round((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 1 else
-    "{}.{}".format(floor(self), ceil((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 2 else self)
+    "{0}.{1}".format(floor(self),
+    (((1 + self - floor(self)) * 10 ** precision) if truncate == 0 else
+    round((1 + self - floor(self)) * 10 ** precision) if truncate == 1 else
+    ceil((1 + self - floor(self)) * 10 ** precision) if truncate == 2 else [])
+    [0].substring(1, precision))
 
 macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
 macro Player.getSplit(lastSplit = 0):
