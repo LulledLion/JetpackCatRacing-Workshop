@@ -82,7 +82,7 @@ variables {
         5: OldPosition
         6: CurrentPosition
         7: IsRacing
-        8: SpeedMultiplier
+        8: Speed
         9: CurrentCheckpointIdx
         10: GoalCheckpoint
         11: AfterNextCheckpoint
@@ -377,7 +377,7 @@ rule ("HUD Setup") {
         Create HUD Text(First Of(True), Null, Custom String("Discord: dsc.gg/jetpack                                                                                                    "), Null, Left, 10, Null, Value In Array(Global.ColorConfig, 2), Null, Visible To, Default Visibility);
         Create HUD Text(If-Then-Else(Compare((Local Player).CurrentEditorMode, ==, 0), All Players(All Teams), Null), Null, Null, Custom String("Press [{0}]: Quick reset\nHold [{0}]: full restart\n", Input Binding String(Button(Reload))), Right, 15, Null, Null, Value In Array(Global.ColorConfig, 3), Visible To and String, Default Visibility);
         Create HUD Text(If-Then-Else((Host Player).ShouldShowExportInstructions, Null, Local Player), If-Then-Else((Local Player).IsRacing, Icon String(Arrow: Right), If-Then-Else(Compare((Local Player).CurrentCheckpointIdx, ==, 0), Icon String(Flag), Icon String(Checkmark))), Custom String("{0} / {1}", (Local Player).CurrentCheckpointIdx, Subtract(Count Of(Global.Checkpoints), 1)), Custom String("Time: {0}", If-Then-Else((Local Player).StopTime, Custom String("{0}.{1}", Round To Integer((Local Player).StopTime, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Local Player).StopTime), Round To Integer((Local Player).StopTime, Down)), 10000), Up)), 1, 4)), If-Then-Else((Local Player).StartTime, Subtract(Global.ServerTimeElapsed, (Local Player).StartTime), 0))), Top, 0, Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
-        Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: x{1}                                                                                                    ", Icon String(Bolt), Divide((Local Player).SpeedMultiplier, 100))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
+        Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: {1}%                                                                                                    ", Icon String(Bolt), Round To Integer(Add(Multiply(0.5, (Local Player).Speed), 2.667), To Nearest))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
         Create HUD Text(If-Then-Else((Local Player).PersonalBest, Local Player, Null), Null, Custom String("{0} Personal best: {1}", Ability Icon String(Hero(Jetpack Cat), Button(Ability 2)), (Local Player).PersonalBest), Null, Right, 16, Null, Value In Array(Global.ColorConfig, 9), Null, Visible To Sort Order String and Color, Default Visibility);
     }
 }
@@ -478,13 +478,13 @@ rule ("Subroutine GoToResetPoint") {
         GoToResetPoint;
     }
     actions {
+        Set Player Variable(Event Player, Speed, 195);
+        Set Move Speed(Event Player, (Event Player).Speed);
         "If there's no checkpoint set then ignore it"
         If(Compare((Event Player).CurrentCheckpoint, ==, Null));
             Respawn(Event Player);
             Abort;
         End;
-        Set Player Variable(Event Player, SpeedMultiplier, 100);
-        Set Move Speed(Event Player, 100);
         Teleport(Event Player, (Event Player).CurrentCheckpoint);
         Start Forcing Player Position(Event Player, (Event Player).CurrentCheckpoint, True);
         Wait(0.016, Ignore Condition);
@@ -541,15 +541,15 @@ rule ("Arrive at Checkpoint") {
         (Event Player).CurrentEditorMode == 0;
         (Event Player).GoalCheckpoint != Null;
         Is Alive(Event Player) == True;
-        (Event Player).IsRacing != False;
         "2.65"
         Distance Between((Event Player).GoalCheckpoint, Update Every Frame(Eye Position(Event Player))) <= Global.RingSize;
     }
     actions {
-        "TODO: Separate starting the level vs arriving at a checkpoint IN the level?"
         Play Effect(Event Player, Buff Explosion Sound, Color(White), Eye Position(Event Player), 100);
-        Set Move Speed(Event Player, Multiply((Event Player).SpeedMultiplier, 2));
-        Modify Player Variable(Event Player, SpeedMultiplier, Add, 3);
+        "$$ TODO: Map adjustable actual speed percent"
+        Modify Player Variable(Event Player, Speed, Add, 3);
+        "$$ TODO: Map adjustable actual speed percent"
+        Set Move Speed(Event Player, (Event Player).Speed);
         Modify Player Variable(Event Player, CurrentCheckpointIdx, Add, 1);
         Call Subroutine(SetCheckpoints);
         If(Compare(Count Of(Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx)), ==, 2));
@@ -722,7 +722,6 @@ rule ("Editor | Enable Checkpoint Selection") {
             Abort;
         End;
         Wait(0.5, Abort When False);
-        Set Player Variable(Event Player, StartTime, 0);
         Set Player Variable(Event Player, StopTime, 0);
         "If there's no checkpoints, create 1 at the player's position"
         If(Compare(Count Of(Global.Checkpoints), ==, 0));
@@ -733,11 +732,13 @@ rule ("Editor | Enable Checkpoint Selection") {
         Set Player Variable(Event Player, CurrentEditorMode, If-Then-Else(Compare((Event Player).CurrentEditorMode, ==, 0), 2, 0));
         "Entering edit mode: Start the camera and stop the timer"
         If(Compare((Event Player).CurrentEditorMode, >, 0));
+            Set Player Variable(Event Player, StartTime, 0);
             Call Subroutine(StartEditorCamera);
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Buff Explosion Sound, Color(White), Value In Array(Global.Checkpoints, (Host Player).CurrentCheckpointIdx), 100);
         "Exiting edit mode: Stop the camera and continue the timer"
         Else;
+            Set Player Variable(Event Player, StartTime, Total Time Elapsed);
             Set Player Variable(Event Player, ActivelyEditing, False);
             Destroy Effect((Event Player).EditCheckpointEffect);
             Call Subroutine(StopEditorCamera);
@@ -988,7 +989,7 @@ rule ("Editor | Start Editor 3rd Person Camera") {
     actions {
         Set Invisible(Event Player, All);
         Call Subroutine(DisableAbilities);
-        Start Camera(Event Player, Add((Event Player).CurrentCheckpoint, Update Every Frame(Multiply(Facing Direction Of(Event Player), Multiply(-1, Subtract(Distance Between((Event Player).CurrentCheckpoint, Ray Cast Hit Position((Event Player).CurrentCheckpoint, Add((Event Player).CurrentCheckpoint, Multiply(Facing Direction Of(Event Player), -8)), Null, Null, False)), 1))))), (Event Player).CurrentCheckpoint, 500);
+        Start Camera(Event Player, Update Every Frame(Add(Ray Cast Hit Position((Event Player).CurrentCheckpoint, Subtract((Event Player).CurrentCheckpoint, Multiply(8, Facing Direction Of(Event Player))), Null, Null, False), Facing Direction Of(Event Player))), (Event Player).CurrentCheckpoint, 500);
     }
 }
 
@@ -998,7 +999,7 @@ rule ("Editor | Start Editor 3rd Person Camera | Checkpoint Movement") {
         StartEditorCamera2;
     }
     actions {
-        Start Camera(Event Player, Add((Event Player).EditCheckpointTemp, Multiply(Update Every Frame(Facing Direction Of(Event Player)), -6)), (Event Player).EditCheckpointTemp, 25);
+        Start Camera(Event Player, Subtract((Event Player).EditCheckpointTemp, Multiply(6, Update Every Frame(Facing Direction Of(Event Player)))), (Event Player).EditCheckpointTemp, 25);
     }
 }
 
