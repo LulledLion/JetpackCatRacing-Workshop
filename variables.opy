@@ -35,7 +35,7 @@ playervar PersonalBest
 playervar OldPosition
 playervar CurrentPosition
 playervar IsRacing
-playervar SpeedMultiplier
+playervar Speed
 playervar CurrentCheckpointIdx
 playervar GoalCheckpoint
 playervar AfterNextCheckpoint
@@ -135,6 +135,17 @@ macro Float.numberString(precision = 4, truncate = 2):
     round((1 + self - floor(self)) * 10 ** precision) if truncate == 1 else
     ceil((1 + self - floor(self)) * 10 ** precision) if truncate == 2 else [])
     [0].substring(1, precision))
+
+macro BASE_SPEED = 195 # Same frenzy speed as 100%
+macro Player.getSpeedPercent = round(0.5 * self.Speed + 2.667)
+macro Player.SetSpeed(speed):
+    self.Speed = speed
+    self.setMoveSpeed(self.Speed)
+macro Player.ModifySpeed(modifier):
+    self.Speed += modifier
+    self.SetSpeed(self.Speed)
+macro Player.ResetSpeed():
+    eventPlayer.SetSpeed(BASE_SPEED)
 
 macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
 macro Player.getSplit(lastSplit = 0):

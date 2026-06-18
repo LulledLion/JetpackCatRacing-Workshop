@@ -8,12 +8,12 @@ def SetCheckpoints():
 
 
 def GoToResetPoint(): # go to CurrentCheckpoint
+    eventPlayer.ResetSpeed()
 	# If there's no checkpoint set then ignore it
 	if eventPlayer.CurrentCheckpoint == null:
 		eventPlayer.respawn()
 		return
-    eventPlayer.SpeedMultiplier = 100
-    eventPlayer.setMoveSpeed(100)
+
     eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
     eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
     wait()
@@ -55,14 +55,13 @@ rule "Arrive at Checkpoint":
     @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
 	@Condition eventPlayer.GoalCheckpoint != null
     #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
-    @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
+    @Condition eventPlayer.isAlive()
     @Condition distance(eventPlayer.GoalCheckpoint, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
     # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
-    eventPlayer.SpeedMultiplier += 3
+    eventPlayer.ModifySpeed(3) #TODO Map adjustable actual speed percent
 
     eventPlayer.CurrentCheckpointIdx += 1
     SetCheckpoints()
