@@ -3,7 +3,7 @@ settings
 	main
 	{
 		Description: "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nWorkshop website: workshop.codes/TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing"
-		Mode Name: "Jetpack Cat Racing 1.1.0"
+		Mode Name: "Jetpack Cat Racing 1.1.1"
 	}
 	lobby
 	{
@@ -98,13 +98,12 @@ variables {
 subroutines {
     0: FullReset
     1: GoToResetPoint
-    2: ResetSpeed
-    3: StartEditorCamera
-    4: StartEditorCamera2
-    5: StopEditorCamera
-    6: DisableAbilities
-    7: EnableAbilities
-    8: SetCheckpoints
+    2: StartEditorCamera
+    3: StartEditorCamera2
+    4: StopEditorCamera
+    5: DisableAbilities
+    6: EnableAbilities
+    7: SetCheckpoints
 }
 
 //Strict optimizations enabled
@@ -467,20 +466,9 @@ rule ("Subroutine SetCheckpoints") {
         SetCheckpoints;
     }
     actions {
-        Set Player Variable(Event Player, CurrentCheckpoint, Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx));
-        Set Player Variable(Event Player, GoalCheckpoint, Value In Array(Global.Checkpoints, Add((Event Player).CurrentCheckpointIdx, 1)));
-        Set Player Variable(Event Player, AfterNextCheckpoint, Value In Array(Global.Checkpoints, Add((Event Player).CurrentCheckpointIdx, 2)));
-    }
-}
-
-rule ("Subroutine ResetSpeed") {
-    event {
-        Subroutine;
-        ResetSpeed;
-    }
-    actions {
-        Set Move Speed(Event Player, 100);
-        Set Player Variable(Event Player, SpeedMultiplier, 100);
+        Set Player Variable(Event Player, CurrentCheckpoint, Last Of(Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx)));
+        Set Player Variable(Event Player, GoalCheckpoint, First Of(Value In Array(Global.Checkpoints, Add((Event Player).CurrentCheckpointIdx, 1))));
+        Set Player Variable(Event Player, AfterNextCheckpoint, First Of(Value In Array(Global.Checkpoints, Add((Event Player).CurrentCheckpointIdx, 2))));
     }
 }
 
@@ -495,6 +483,8 @@ rule ("Subroutine GoToResetPoint") {
             Respawn(Event Player);
             Abort;
         End;
+        Set Player Variable(Event Player, SpeedMultiplier, 100);
+        Set Move Speed(Event Player, 100);
         Teleport(Event Player, (Event Player).CurrentCheckpoint);
         Start Forcing Player Position(Event Player, (Event Player).CurrentCheckpoint, True);
         Wait(0.016, Ignore Condition);
@@ -520,7 +510,6 @@ rule ("Subroutine FullReset") {
         Set Player Variable(Event Player, IsRacing, False);
         "CurrentCheckpoint is first reset so this works"
         Call Subroutine(GoToResetPoint);
-        Call Subroutine(ResetSpeed);
         Wait Until(And(Is Moving(Event Player), Compare((Event Player).CurrentEditorMode, ==, 0)), 999999999999);
         Set Player Variable(Event Player, IsRacing, True);
         Abort If(Compare(Count Of(Global.Checkpoints), <=, 1));
@@ -563,6 +552,8 @@ rule ("Arrive at Checkpoint") {
         Modify Player Variable(Event Player, SpeedMultiplier, Add, 3);
         Modify Player Variable(Event Player, CurrentCheckpointIdx, Add, 1);
         Call Subroutine(SetCheckpoints);
+        If(Compare(Count Of(Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx)), ==, 2));
+            Teleport(Event Player, (Event Player).CurrentCheckpoint);
     }
 }
 
@@ -633,7 +624,6 @@ rule ("Reset - Single Checkpoint") {
         Abort If(Is Button Held(Event Player, Button(Reload)));
         If((Event Player).CurrentCheckpointIdx);
             Call Subroutine(GoToResetPoint);
-            Call Subroutine(ResetSpeed);
         Else;
             Call Subroutine(FullReset);
     }
@@ -665,7 +655,6 @@ rule ("Handle Death") {
     actions {
         Respawn(Event Player);
         Call Subroutine(GoToResetPoint);
-        Call Subroutine(ResetSpeed);
     }
 }
 
@@ -745,7 +734,6 @@ rule ("Editor | Enable Checkpoint Selection") {
         "Entering edit mode: Start the camera and stop the timer"
         If(Compare((Event Player).CurrentEditorMode, >, 0));
             Call Subroutine(StartEditorCamera);
-            "stop timer\nstopChasingVariable(eventPlayer.Timer)"
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Buff Explosion Sound, Color(White), Value In Array(Global.Checkpoints, (Host Player).CurrentCheckpointIdx), 100);
         "Exiting edit mode: Stop the camera and continue the timer"
@@ -754,7 +742,7 @@ rule ("Editor | Enable Checkpoint Selection") {
             Destroy Effect((Event Player).EditCheckpointEffect);
             Call Subroutine(StopEditorCamera);
             Set Player Variable(Event Player, IsMovingCheckpoint, False);
-            "start timer\nif len(Checkpoints) > 1:\nchaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)\nif eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:\neventPlayer.IsRacing = true"
+            "if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:\neventPlayer.IsRacing = true"
             Teleport(Event Player, Value In Array(Global.Checkpoints, (Event Player).CurrentCheckpointIdx));
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Ring Explosion Sound, Color(White), Position Of(Host Player), 100);
@@ -774,7 +762,6 @@ rule ("Editor | Export Data") {
     }
     actions {
         Wait(0.5, Abort When False);
-        "smallMessage(hostPlayer, \"   Map Data Exporting...\")\nplayEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)"
         Set Player Variable(Host Player, ShouldShowExportInstructions, True);
         Set Global Variable(LeaderboardText, Null);
         Set Global Variable(LeaderboardEntries, Null);
@@ -783,7 +770,6 @@ rule ("Editor | Export Data") {
         Set Global Variable(CreatorName, Null);
         Set Global Variable(MapCode, Null);
         Set Global Variable(RestartLobbyTime, Null);
-        "InfiniteLobbyTime = null #$$ Remove"
         Enable Inspector Recording;
         Disable Inspector Recording;
         Small Message(Host Player, Custom String("   Map Data Exported - Open Inspector"));

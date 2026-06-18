@@ -38,8 +38,6 @@ def FullReset():
     if len(Checkpoints) <= 1:
         return
     eventPlayer.StartTime = getTotalTimeElapsed()
-	#if len(Checkpoints) > 1:
-	#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
 
 
 

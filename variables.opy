@@ -13,7 +13,6 @@ globalvar ColorConfig 22
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
-# globalvar InfiniteLobbyTime 51 #$$ Remove
 globalvar ServerTimeElapsed
 
 # HUD Related
@@ -57,7 +56,6 @@ subroutine StopEditorCamera
 subroutine DisableAbilities
 subroutine EnableAbilities
 subroutine SetCheckpoints
-# subroutine LeaderboardUpdate #$$ Remove
 
 # testscripts disable: ##, enable: #
 #!define test_script ##

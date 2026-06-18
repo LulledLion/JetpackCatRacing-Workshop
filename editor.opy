@@ -34,8 +34,6 @@ rule "Editor | Enable Checkpoint Selection":
 	# Entering edit mode: Start the camera and stop the timer 
     if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
         StartEditorCamera()
-		# stop timer
-		#stopChasingVariable(eventPlayer.Timer)
         wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
 	# Exiting edit mode: Stop the camera and continue the timer
@@ -44,9 +42,6 @@ rule "Editor | Enable Checkpoint Selection":
 		destroyEffect(eventPlayer.EditCheckpointEffect)
         StopEditorCamera()
 		eventPlayer.IsMovingCheckpoint = false
-		# start timer
-		#if len(Checkpoints) > 1:
-		#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
         #if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
         #    eventPlayer.IsRacing = true
 		eventPlayer.teleport(Checkpoints[eventPlayer.CurrentCheckpointIdx])
@@ -63,10 +58,7 @@ rule "Editor | Export Data":
 	@Condition not hostPlayer.ShouldShowExportInstructions
 	
     wait(0.5, Wait.ABORT_WHEN_FALSE)
-    #$$ Remove
-	# smallMessage(hostPlayer, "   Map Data Exporting...")
-	# playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-	hostPlayer.ShouldShowExportInstructions = true
+    hostPlayer.ShouldShowExportInstructions = true
     LeaderboardText = null
     LeaderboardEntries = null
     LeaderboardRemake = null
@@ -74,7 +66,6 @@ rule "Editor | Export Data":
 	CreatorName = null
 	MapCode = null
 	RestartLobbyTime = null
-	# InfiniteLobbyTime = null #$$ Remove
     enableInspector()
     disableInspector()
     smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")
@@ -245,12 +236,12 @@ rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to t
 	eventPlayer.EditMeleeButtonPressed = false
 
 
-macro cam_distance = 8
-# calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
-# if nothing is hit then it just returns max length
-# parameter is the start position
-macro cam_dist_calc(start):
-    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1
+
+macro cam_dist_calc(start, dist = 8):
+    # calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
+    # if nothing is hit then it just returns max length
+    # parameter is the start position
+    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - dist, null, null, false).getHitPosition()) - 1
 
 def StartEditorCamera():
     @Name "Editor | Start Editor 3rd Person Camera"
