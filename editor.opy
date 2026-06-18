@@ -21,7 +21,6 @@ rule "Editor | Enable Checkpoint Selection":
 		return
 
 	wait(0.5, Wait.ABORT_WHEN_FALSE)
-    eventPlayer.StartTime = 0
     eventPlayer.StopTime = 0
 	# If there's no checkpoints, create 1 at the player's position
     if len(Checkpoints) == 0:
@@ -31,13 +30,13 @@ rule "Editor | Enable Checkpoint Selection":
 
 	eventPlayer.CurrentEditorMode = EEditorMode.MOVE if eventPlayer.CurrentEditorMode == EEditorMode.OFF else EEditorMode.OFF
 
-	# Entering edit mode: Start the camera and stop the timer 
-    if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
+    if eventPlayer.CurrentEditorMode > EEditorMode.OFF: # Entering edit mode: Start the camera and stop the timer
+        eventPlayer.StartTime = 0
         StartEditorCamera()
         wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-	# Exiting edit mode: Stop the camera and continue the timer
-    else:
+    else: # Exiting edit mode: Stop the camera and continue the timer
+        eventPlayer.StartTime = getTotalTimeElapsed()
 		eventPlayer.ActivelyEditing = false
 		destroyEffect(eventPlayer.EditCheckpointEffect)
         StopEditorCamera()
