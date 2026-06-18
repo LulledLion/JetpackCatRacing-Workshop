@@ -1,12 +1,9 @@
 #!mainFile "main.opy"
 
 def SetCheckpoints():
-    eventPlayer.CurrentCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx] 
-    eventPlayer.GoalCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 1]
-    eventPlayer.AfterNextCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 2]
-
-
-    
+    eventPlayer.CurrentCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx].last()
+    eventPlayer.GoalCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 1][0]
+    eventPlayer.AfterNextCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 2][0]
 
 
 
@@ -43,9 +40,9 @@ def FullReset():
     eventPlayer.StartTime = getTotalTimeElapsed()
 	#if len(Checkpoints) > 1:
 	#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
-    
-	
-    
+
+
+
 rule "Save previous position":
     @Event playerJoined
     eventPlayer.OldPosition = eventPlayer.CurrentPosition
@@ -71,6 +68,8 @@ rule "Arrive at Checkpoint":
 
     eventPlayer.CurrentCheckpointIdx += 1
     SetCheckpoints()
+    if len(Checkpoints[eventPlayer.CurrentCheckpointIdx]) == 2:
+        eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
 
 
 
