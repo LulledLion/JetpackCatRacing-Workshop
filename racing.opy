@@ -54,14 +54,12 @@ rule "Arrive at Checkpoint":
     @Event eachPlayer
     @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
 	@Condition eventPlayer.GoalCheckpoint != null
-    #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
     @Condition eventPlayer.isAlive()
     @Condition distance(eventPlayer.GoalCheckpoint, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
-    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.ModifySpeed(3) #TODO Map adjustable actual speed percent
+    eventPlayer.ModifySpeed(3) #$$ TODO: Map adjustable actual speed percent
 
     eventPlayer.CurrentCheckpointIdx += 1
     SetCheckpoints()
