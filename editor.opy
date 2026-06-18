@@ -237,12 +237,6 @@ rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to t
 
 
 
-macro cam_dist_calc(start, dist = 8):
-    # calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
-    # if nothing is hit then it just returns max length
-    # parameter is the start position
-    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - dist, null, null, false).getHitPosition()) - 1
-
 def StartEditorCamera():
     @Name "Editor | Start Editor 3rd Person Camera"
     
@@ -250,9 +244,11 @@ def StartEditorCamera():
     DisableAbilities()
 
     eventPlayer.startCamera(
-        eventPlayer.CurrentCheckpoint + updateEveryFrame(eventPlayer.getFacingDirection() * - cam_dist_calc(eventPlayer.CurrentCheckpoint) ),
-        eventPlayer.CurrentCheckpoint, 
-        500
+        updateEveryFrame(
+        raycastHitPosition(eventPlayer.CurrentCheckpoint,
+        eventPlayer.CurrentCheckpoint - 8 * eventPlayer.getFacingDirection(),
+        null, null, false) + eventPlayer.getFacingDirection()),
+        eventPlayer.CurrentCheckpoint, 500
     )
     
 
@@ -260,9 +256,7 @@ def StartEditorCamera2():
     @Name "Editor | Start Editor 3rd Person Camera | Checkpoint Movement"
 
     eventPlayer.startCamera(
-        eventPlayer.EditCheckpointTemp + (
-            updateEveryFrame(eventPlayer.getFacingDirection()) * -6
-        ), 
+        eventPlayer.EditCheckpointTemp - 6 * updateEveryFrame(eventPlayer.getFacingDirection()), 
         eventPlayer.EditCheckpointTemp, 
         25
     )
