@@ -66,16 +66,10 @@ rule "Arrive at Checkpoint":
     if len(Checkpoints[eventPlayer.CheckpointCurrentIdx]) == 2:
         eventPlayer.teleport(eventPlayer.CheckpointCurrent)
 
+    if len(Checkpoints) <= 1 or eventPlayer.CheckpointCurrentIdx < len(Checkpoints) - 1:
+        return
 
-
-rule "Finish":
-    @Event eachPlayer
-    @Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
-    @Condition len(Checkpoints) > 1
-    @Condition eventPlayer.CheckpointGoal == null
-    @Condition eventPlayer.CheckpointCurrentIdx == len(Checkpoints) - 1 
-    #@Condition eventPlayer.isAlive()
-    #stopChasingVariable(eventPlayer.Timer)
+    #Finished
     eventPlayer.IsRacing = false
     eventPlayer.TimeStop = getTotalTimeElapsed()
     eventPlayer.TimeStop -= eventPlayer.TimeStart
