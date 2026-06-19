@@ -13,7 +13,7 @@ globalvar ColorConfig 22
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
-globalvar ServerTimeElapsed
+globalvar ServerTimeElapsed 51
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
@@ -25,19 +25,6 @@ globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
 
 # Player variables
-playervar TimeStart
-playervar TimeStop
-playervar TimePersonalBest
-playervar TimeLastSplit
-playervar TimeSplitArray
-playervar PositionOld
-playervar PositionCurrent
-playervar IsRacing
-playervar Speed
-playervar CheckpointCurrentIdx
-playervar CheckpointCurrent
-playervar CheckpointGoal
-playervar CheckpointAfterNext
 playervar EditorOn
 playervar EditorCurrentMode
 playervar EditingActive
@@ -46,6 +33,23 @@ playervar EditCheckpointTemp
 playervar EditMeleeButtonPressed
 playervar EditorIsMovingCheckpoint
 playervar EditorShowingExportInstructions
+
+playervar CheckpointCurrentIdx
+playervar CheckpointCurrent
+playervar CheckpointGoal
+playervar CheckpointAfterNext
+
+playervar TimeStart
+playervar TimeStop
+playervar TimePersonalBest
+#playervar TimeLastSplit
+#playervar TimeSplitArray
+#playervar TimeStringSplits
+playervar PositionOld
+playervar PositionCurrent
+
+playervar IsRacing
+playervar Speed
 
 # Subroutines
 subroutine FullReset
