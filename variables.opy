@@ -25,29 +25,27 @@ globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
 
 # Player variables
-
-playervar WsEditorOn
-playervar CurrentEditorMode
-#playervar Timer
 playervar TimeStart
 playervar TimeStop
-playervar PersonalBest
+playervar TimePersonalBest
 playervar TimeLastSplit
 playervar TimeSplitArray
-playervar OldPosition
-playervar CurrentPosition
+playervar PositionOld
+playervar PositionCurrent
 playervar IsRacing
 playervar Speed
-playervar CurrentCheckpointIdx
-playervar GoalCheckpoint
-playervar AfterNextCheckpoint
-playervar CurrentCheckpoint
-playervar ActivelyEditing
+playervar CheckpointCurrentIdx
+playervar CheckpointCurrent
+playervar CheckpointGoal
+playervar CheckpointAfterNext
+playervar EditorOn
+playervar EditorCurrentMode
+playervar EditingActive
 playervar EditCheckpointEffect
 playervar EditCheckpointTemp
 playervar EditMeleeButtonPressed
-playervar IsMovingCheckpoint
-playervar ShouldShowExportInstructions
+playervar EditorIsMovingCheckpoint
+playervar EditorShowingExportInstructions
 
 # Subroutines
 subroutine FullReset

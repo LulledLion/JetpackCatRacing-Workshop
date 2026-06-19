@@ -16,7 +16,7 @@ rule "HUD Setup":
         f"Discord: dsc.gg/jetpack{LeftAlign100}",
         HudPosition.LEFT, EHudOrder.DISC, ColorConfig[ECustomize.DSC], HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
-    hudSubtext(getAllPlayers() if localPlayer.CurrentEditorMode == EEditorMode.OFF else null, 
+    hudSubtext(getAllPlayers() if localPlayer.EditorCurrentMode == EEditorMode.OFF else null, 
         "Press [{0}]: Quick reset\n"
         "Hold [{0}]: full restart\n"
         "".format(
@@ -26,9 +26,9 @@ rule "HUD Setup":
     )
     
     hudText(
-        localPlayer if not hostPlayer.ShouldShowExportInstructions else null, 
-        iconString(Icon.ARROW_RIGHT) if localPlayer.IsRacing else iconString(Icon.FLAG) if localPlayer.CurrentCheckpointIdx == 0 else  iconString(Icon.CHECKMARK) , 
-        "{} / {}".format(localPlayer.CurrentCheckpointIdx, len(Checkpoints)-1), 
+        localPlayer if not hostPlayer.EditorShowingExportInstructions else null, 
+        iconString(Icon.ARROW_RIGHT) if localPlayer.IsRacing else iconString(Icon.FLAG) if localPlayer.CheckpointCurrentIdx == 0 else  iconString(Icon.CHECKMARK) , 
+        "{} / {}".format(localPlayer.CheckpointCurrentIdx, len(Checkpoints)-1), 
         "Time: {}".format(localPlayer.CurrentTime), 
         HudPosition.TOP, 
 		EHudOrder.TIMER,
@@ -38,19 +38,19 @@ rule "HUD Setup":
 
     hudSubtext(localPlayer, "\n{0} Speed: {1}\n{2} Multiplier: {3}%{4}".format(abilityIconString(Hero.JETPACK_CAT, Button.SECONDARY_FIRE), localPlayer.getSpeed(), iconString(Icon.BOLT), localPlayer.getSpeedPercent, LeftAlign100), HudPosition.LEFT, EHudOrder.SPD, ColorConfig[ECustomize.SPD_COLOR], HudReeval.VISIBILITY_AND_STRING)
     
-    hudSubheader(localPlayer if localPlayer.PersonalBest else null, "{} Personal best: {}".format(abilityIconString(Hero.JETPACK_CAT, Button.ABILITY_2) ,localPlayer.PersonalBest), HudPosition.RIGHT, EHudOrder.PERSONAL_BEST, ColorConfig[ECustomize.PERSONAL_BEST], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
+    hudSubheader(localPlayer if localPlayer.TimePersonalBest else null, "{} Personal best: {}".format(abilityIconString(Hero.JETPACK_CAT, Button.ABILITY_2) ,localPlayer.TimePersonalBest), HudPosition.RIGHT, EHudOrder.PERSONAL_BEST, ColorConfig[ECustomize.PERSONAL_BEST], HudReeval.VISIBILITY_SORT_ORDER_STRING_AND_COLOR, SpecVisibility.DEFAULT)
 
 
 rule "Effects Setup":
     wait(ELoadOrder.EFFECTS)
-    createEffect(localPlayer.filter(lambda _: localPlayer.GoalCheckpoint != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.GOAL_CP], localPlayer.GoalCheckpoint, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    createEffect(localPlayer.filter(lambda _: localPlayer.AfterNextCheckpoint != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.AFTER_NEXT_CP], localPlayer.AfterNextCheckpoint, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    createEffect(localPlayer.filter(lambda _: Checkpoints[localPlayer.CurrentCheckpointIdx] != 0 and localPlayer.CurrentEditorMode > EEditorMode.OFF), Effect.GOOD_AURA, Color.RED, Checkpoints[localPlayer.CurrentCheckpointIdx], RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(localPlayer.filter(lambda _: localPlayer.CheckpointGoal != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.GOAL_CP], localPlayer.CheckpointGoal, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(localPlayer.filter(lambda _: localPlayer.CheckpointAfterNext != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.AFTER_NEXT_CP], localPlayer.CheckpointAfterNext, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(localPlayer.filter(lambda _: Checkpoints[localPlayer.CheckpointCurrentIdx] != 0 and localPlayer.EditorCurrentMode > EEditorMode.OFF), Effect.GOOD_AURA, Color.RED, Checkpoints[localPlayer.CheckpointCurrentIdx], RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
 
     # checkpoint icon
     createIcon( 
-        localPlayer.filter(lambda _: localPlayer.CurrentEditorMode == EEditorMode.OFF and localPlayer.GoalCheckpoint != 0 and not localPlayer.isInViewAngle(localPlayer.GoalCheckpoint, 4) ), 
-        localPlayer.GoalCheckpoint + vect(0,1,0), 
+        localPlayer.filter(lambda _: localPlayer.EditorCurrentMode == EEditorMode.OFF and localPlayer.CheckpointGoal != 0 and not localPlayer.isInViewAngle(localPlayer.CheckpointGoal, 4) ), 
+        localPlayer.CheckpointGoal + vect(0,1,0), 
         Icon.ARROW_DOWN, 
         IconReeval.VISIBILITY_AND_POSITION, ColorConfig[ECustomize.GOAL_COLOR], true
     )
@@ -93,22 +93,22 @@ rule "Remake Leaderboard HUD":
 
 
 rule "Editor HUD":
-    @Condition hostPlayer.WsEditorOn
+    @Condition hostPlayer.EditorOn
     
 	# Current mode Top HUD
     hudHeader(
-        hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-		" {0} Move Mode ".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)) if localPlayer.CurrentEditorMode == EEditorMode.MOVE else " {0} Insert Mode ".format(iconString(Icon.HALO)) if localPlayer.CurrentEditorMode == EEditorMode.INSERT else " {0} Remove Mode ".format(iconString(Icon.TRASHCAN)),
+        hostPlayer if hostPlayer.EditorCurrentMode > EEditorMode.OFF and not hostPlayer.EditorShowingExportInstructions else null,
+		" {0} Move Mode ".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)) if localPlayer.EditorCurrentMode == EEditorMode.MOVE else " {0} Insert Mode ".format(iconString(Icon.HALO)) if localPlayer.EditorCurrentMode == EEditorMode.INSERT else " {0} Remove Mode ".format(iconString(Icon.TRASHCAN)),
         HudPosition.TOP, 
         EHudOrder.EDITOR_MODE_TEXT, 
-		Color.BLUE if localPlayer.CurrentEditorMode == EEditorMode.MOVE else Color.GREEN if localPlayer.CurrentEditorMode == EEditorMode.INSERT else Color.RED,
+		Color.BLUE if localPlayer.EditorCurrentMode == EEditorMode.MOVE else Color.GREEN if localPlayer.EditorCurrentMode == EEditorMode.INSERT else Color.RED,
         HudReeval.VISIBILITY_STRING_AND_COLOR, 
         SpecVisibility.NEVER
     )
 
 	# Next checkpoint HUD
     hudSubtext(
-        hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
+        hostPlayer if hostPlayer.EditorCurrentMode > EEditorMode.OFF and not hostPlayer.EditorShowingExportInstructions else null,
         f"\n\n\n\n\n{iconString(Icon.ARROW_UP)} NEXT CHECKPOINT",
         HudPosition.TOP, 
         EHudOrder.NEXT_CP_TEXT, 
@@ -119,8 +119,8 @@ rule "Editor HUD":
 
 	# Previous/Next mode button
     hudSubtext(
-        hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-        f"\n\n\n\n\n\n\n\n{iconString(Icon.ARROW_LEFT)} {'Move Mode' if (localPlayer.CurrentEditorMode + 1 if localPlayer.CurrentEditorMode < len(EEditorMode) - 1 else 2) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.CurrentEditorMode + 1 if localPlayer.CurrentEditorMode < len(EEditorMode) - 1 else 2) == EEditorMode.INSERT else 'Remove Mode'}                                                                             {'Move Mode' if (localPlayer.CurrentEditorMode - 1 if localPlayer.CurrentEditorMode > 2 else len(EEditorMode) - 1) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.CurrentEditorMode - 1 if localPlayer.CurrentEditorMode > 2 else len(EEditorMode) - 1) == EEditorMode.INSERT else 'Remove Mode'} {iconString(Icon.ARROW_RIGHT)}",
+        hostPlayer if hostPlayer.EditorCurrentMode > EEditorMode.OFF and not hostPlayer.EditorShowingExportInstructions else null,
+        f"\n\n\n\n\n\n\n\n{iconString(Icon.ARROW_LEFT)} {'Move Mode' if (localPlayer.EditorCurrentMode + 1 if localPlayer.EditorCurrentMode < len(EEditorMode) - 1 else 2) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.EditorCurrentMode + 1 if localPlayer.EditorCurrentMode < len(EEditorMode) - 1 else 2) == EEditorMode.INSERT else 'Remove Mode'}                                                                             {'Move Mode' if (localPlayer.EditorCurrentMode - 1 if localPlayer.EditorCurrentMode > 2 else len(EEditorMode) - 1) == EEditorMode.MOVE else 'Insert Mode' if (localPlayer.EditorCurrentMode - 1 if localPlayer.EditorCurrentMode > 2 else len(EEditorMode) - 1) == EEditorMode.INSERT else 'Remove Mode'} {iconString(Icon.ARROW_RIGHT)}",
         HudPosition.TOP, 
         EHudOrder.NEXT_PREV_MODE_TEXT, 
         Color.WHITE, 
@@ -130,7 +130,7 @@ rule "Editor HUD":
 
 	# Press interact to open editor for if there's no checkpoints
 	hudSubtext(
-        hostPlayer if len(Checkpoints) == 0 and not hostPlayer.ShouldShowExportInstructions else null,
+        hostPlayer if len(Checkpoints) == 0 and not hostPlayer.EditorShowingExportInstructions else null,
         "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHold [{0}] to set the first checkpoint and open the editor".format(inputBindingString(Button.INTERACT)), 
 		HudPosition.TOP,
         EHudOrder.FIRST_CP_TEXT,
@@ -142,7 +142,7 @@ rule "Editor HUD":
 	# Press interact to open editor
     # hudSubtext(
     #     hostPlayer if len(Checkpoints) > 0 and not hostPlayer.ShouldShowExportInstructions else null,
-    #     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEnable Editor: Hold [{0}]".format(inputBindingString(Button.INTERACT)) if localPlayer.CurrentEditorMode <= EEditorMode.OFF else (f"Disable Editor: Hold [{inputBindingString(Button.INTERACT)}]" if not localPlayer.IsMovingCheckpoint else f"Cancel Move: Press [{inputBindingString(Button.INTERACT)}]" ),        HudPosition.TOP,
+    #     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEnable Editor: Hold [{0}]".format(inputBindingString(Button.INTERACT)) if localPlayer.EditorCurrentMode <= EEditorMode.OFF else (f"Disable Editor: Hold [{inputBindingString(Button.INTERACT)}]" if not localPlayer.IsMovingCheckpoint else f"Cancel Move: Press [{inputBindingString(Button.INTERACT)}]" ),        HudPosition.TOP,
     #     103,
     #     Color.WHITE, 
     #     HudReeval.VISIBILITY_STRING_AND_COLOR,
@@ -151,18 +151,18 @@ rule "Editor HUD":
 
 	# Save buttons (Melee)
     hudSubtext(
-        hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
-		f"\n\n\n\nSave: [{inputBindingString(Button.MELEE)}]                                                                    Cancel Move: [{inputBindingString(Button.INTERACT)}]" if localPlayer.CurrentEditorMode == EEditorMode.MOVE and localPlayer.ActivelyEditing else f"\n\n\n\n                                                                              Move: [{inputBindingString(Button.MELEE)}]" if localPlayer.CurrentEditorMode == EEditorMode.MOVE else f"\n\n\n\n                                                                              Insert: [{inputBindingString(Button.MELEE)}]" if localPlayer.CurrentEditorMode == EEditorMode.INSERT else f"\n\n\n\n                                                                              Remove: Hold [{inputBindingString(Button.MELEE)}]",
+        hostPlayer if hostPlayer.EditorCurrentMode > EEditorMode.OFF and not hostPlayer.EditorShowingExportInstructions else null,
+		f"\n\n\n\nSave: [{inputBindingString(Button.MELEE)}]                                                                    Cancel Move: [{inputBindingString(Button.INTERACT)}]" if localPlayer.EditorCurrentMode == EEditorMode.MOVE and localPlayer.EditingActive else f"\n\n\n\n                                                                              Move: [{inputBindingString(Button.MELEE)}]" if localPlayer.EditorCurrentMode == EEditorMode.MOVE else f"\n\n\n\n                                                                              Insert: [{inputBindingString(Button.MELEE)}]" if localPlayer.EditorCurrentMode == EEditorMode.INSERT else f"\n\n\n\n                                                                              Remove: Hold [{inputBindingString(Button.MELEE)}]",
 		HudPosition.TOP,
         EHudOrder.MODE_ACTION_TEXT,
-		Color.SKY_BLUE if localPlayer.CurrentEditorMode == EEditorMode.MOVE else Color.LIME_GREEN if localPlayer.CurrentEditorMode == EEditorMode.INSERT else Color.ROSE,
+		Color.SKY_BLUE if localPlayer.EditorCurrentMode == EEditorMode.MOVE else Color.LIME_GREEN if localPlayer.EditorCurrentMode == EEditorMode.INSERT else Color.ROSE,
         HudReeval.VISIBILITY_STRING_AND_COLOR,
         SpecVisibility.NEVER
     )
 
 	# Previous checkpoint 
     hudSubtext(
-        hostPlayer if hostPlayer.CurrentEditorMode > EEditorMode.OFF and not hostPlayer.ShouldShowExportInstructions else null,
+        hostPlayer if hostPlayer.EditorCurrentMode > EEditorMode.OFF and not hostPlayer.EditorShowingExportInstructions else null,
         f"\n\n{iconString(Icon.ARROW_DOWN)} PREVIOUS CHECKPOINT",
         HudPosition.TOP, 
         EHudOrder.PREV_CP_TEXT, 
@@ -173,21 +173,21 @@ rule "Editor HUD":
 
 	# Editor mode and export buttons
     hudSubtext(
-        hostPlayer if hostPlayer.WsEditorOn else null, 
+        hostPlayer if hostPlayer.EditorOn else null, 
         f"Hold [{inputBindingString(Button.INTERACT)}]: To toggle Editor\nHold [{inputBindingString(Button.INTERACT)} + {inputBindingString(Button.ULTIMATE)}]: To Export Data\n",
         HudPosition.RIGHT, EHudOrder.CONTROLS + 10, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
 
 	# move fast/slow in move mode
     hudSubtext(
-        hostPlayer if hostPlayer.WsEditorOn and hostPlayer.CurrentEditorMode == EEditorMode.MOVE and hostPlayer.ActivelyEditing else null, 
+        hostPlayer if hostPlayer.EditorOn and hostPlayer.EditorCurrentMode == EEditorMode.MOVE and hostPlayer.EditingActive else null, 
         f"Hold [{inputBindingString(Button.PRIMARY_FIRE)}]: Move fast\nHold [{inputBindingString(Button.SECONDARY_FIRE)}]: Move slow",
         HudPosition.RIGHT, EHudOrder.CONTROLS + 10, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
 
 
     # Export instruction
-	hudText(hostPlayer if hostPlayer.ShouldShowExportInstructions else null, 
+	hudText(hostPlayer if hostPlayer.EditorShowingExportInstructions else null, 
 		
 		" 0. Clear Extra Data:\n"
         "   Already Done Upon Opening This Window\n\n"

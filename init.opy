@@ -34,7 +34,7 @@ rule "Init Global":
 rule "Init Player":
     @Event playerJoined
     @Condition eventPlayer.isDummy() == false or eventPlayer in TestBotArray
-    eventPlayer.WsEditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
+    eventPlayer.EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
     
 	eventPlayer.disableKillFeed()
     eventPlayer.disableGamemodeHud()
@@ -59,7 +59,7 @@ rule "Server Time Elapsed":
 rule "After 3s if the checkpoints are empty then provide a warning":
     @Condition getTotalTimeElapsed() > ELoadOrder.MISSING_DATA
 	@Condition len(Checkpoints) == 0 
-	hudHeader(null if localPlayer == hostPlayer and hostPlayer.WsEditorOn else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+	hudHeader(null if localPlayer == hostPlayer and hostPlayer.EditorOn else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
 
 
