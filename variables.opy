@@ -29,9 +29,11 @@ globalvar TestBotArray 126
 playervar WsEditorOn
 playervar CurrentEditorMode
 #playervar Timer
-playervar StartTime
-playervar StopTime
+playervar TimeStart
+playervar TimeStop
 playervar PersonalBest
+playervar TimeLastSplit
+playervar TimeSplitArray
 playervar OldPosition
 playervar CurrentPosition
 playervar IsRacing
@@ -147,10 +149,10 @@ macro Player.ModifySpeed(modifier):
 macro Player.ResetSpeed():
     eventPlayer.SetSpeed(BASE_SPEED)
 
-macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
+macro Player.CurrentTime = self.TimeStop.numberString() if self.TimeStop else ( ServerTimeElapsed - self.TimeStart if self.TimeStart else 0 )
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
-    getTotalTimeElapsed() - self.StartTime - lastSplit
+    getTotalTimeElapsed() - lastSplit
 
 macro line_segmentXsphere(v1, v2, c0, r):
     # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
