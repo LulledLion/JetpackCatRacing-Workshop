@@ -18,9 +18,10 @@ settings {
     },
     "gamemodes": {
         "skirmish": {
+            "enabledMaps": PRESET_SKIRMISH_MAPS
         },
 		"tdm": {
-            "enabledMaps": []
+            "enabledMaps": PRESET_TDM_MAPS
         },
         "general": {
             "gamemodeStartTrigger": "manual",
