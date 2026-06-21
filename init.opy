@@ -13,20 +13,18 @@ rule "Init Global":
         createWorkshopSettingInt("Lobby Setting", "Restart Lobby After X minutes", 15, 1, 60, 0) - 1
     )
     wait(1)
+    setMatchTime(900)
     startForcingSpawn(Team.ALL, 0)
     startForcingSpawn(Team.ALL, 1)
     startForcingSpawn(Team.ALL, 2)
     stopForcingSpawn(Team.ALL)
 
-    LeaderboardText = null
-    LeaderboardEntries = []
-    LeaderboardRemake = null
-
-
     EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
-    #if not EditorOn: TagFG.setupTag() # Used for coloring Live Split
-
-	setMatchTime(900)
+    if not EditorOn:
+        #LeaderboardText = null
+        #LeaderboardRemake = null
+        LeaderboardEntries = []
+        #TagFG.setupTag() # Used for coloring Live Split
 
     wait(ELoadOrder.SETUP)
     
@@ -51,6 +49,7 @@ rule "Init Player":
 
 
 rule "Server Time Elapsed":
+    @Condition EditorOn
     ServerTimeElapsed = getTotalTimeElapsed()
     wait(0)
     loop
