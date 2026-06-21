@@ -148,8 +148,8 @@ macro Float.numberString(precision = 4, truncate = 2):
     ceil((1 + self - floor(self)) * 10 ** precision) if truncate == 2 else [])
     [0].substring(1, precision))
 
-macro BASE_SPEED = 195 # Same frenzy speed as 100%
-macro Player.getSpeedPercent = round(0.5 * self.Speed + 2.667)
+macro BASE_SPEED = 100
+macro Player.getSpeedPercent = round(self.Speed)
 macro Player.SetSpeed(speed):
     self.Speed = speed
     self.setMoveSpeed(self.Speed)

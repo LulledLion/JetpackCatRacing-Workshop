@@ -36,6 +36,7 @@ settings {
             "jetpackCat": {
                 "secondaryFireRechargeRate%": 500,
                 "enablePassiveUnlimitedFuel": true,
+                "movementSpeed%": 195,
                 "enableUlt": false,
                 "enableInfiniteAmmo": true
             },

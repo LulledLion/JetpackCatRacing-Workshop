@@ -57,7 +57,7 @@ rule "Arrive at Checkpoint":
 
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.ModifySpeed(3) #$$ TODO: Map adjustable actual speed percent
+    eventPlayer.ModifySpeed(1.5) #$$ TODO: Map adjustable actual speed percent
 
     #$$ TODO Splits Logic Here
     eventPlayer.TimeSplit = getTotalTimeElapsed()
