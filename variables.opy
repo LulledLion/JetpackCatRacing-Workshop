@@ -14,6 +14,7 @@ globalvar ColorConfig 22
 # Workshop Settings
 globalvar RestartLobbyTime 50
 globalvar ServerTimeElapsed 51
+globalvar EditorOn 52
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
@@ -25,7 +26,7 @@ globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
 
 # Player variables
-playervar EditorOn
+playervar EditorExport
 playervar EditorCurrentMode
 playervar EditingActive
 playervar EditCheckpointEffect

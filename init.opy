@@ -22,6 +22,11 @@ rule "Init Global":
     LeaderboardEntries = []
     LeaderboardRemake = null
 
+
+    EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
+    if not EditorOn:
+        TagFG.setupTag()
+
 	setMatchTime(900)
 
     wait(ELoadOrder.SETUP)
@@ -34,15 +39,12 @@ rule "Init Global":
 rule "Init Player":
     @Event playerJoined
     @Condition eventPlayer.isDummy() == false or eventPlayer in TestBotArray
-    eventPlayer.EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
-    
 	eventPlayer.disableKillFeed()
     eventPlayer.disableGamemodeHud()
     eventPlayer.disableGamemodeInWorldUi()
     eventPlayer.disableMessages()
     eventPlayer.disablePlayerCollision()
     eventPlayer.setAbility1Enabled(false)
-    eventPlayer.setStatusEffect(null, Status.INVINCIBLE, 999999)
 
     waitUntil(getTotalTimeElapsed() > ELoadOrder.PLAYER_INIT, ELoadOrder.PLAYER_INIT) # map variables need to load first
     wait(0.128)
@@ -59,7 +61,7 @@ rule "Server Time Elapsed":
 rule "After 3s if the checkpoints are empty then provide a warning":
     @Condition getTotalTimeElapsed() > ELoadOrder.MISSING_DATA
 	@Condition len(Checkpoints) == 0 
-	hudHeader(null if localPlayer == hostPlayer and hostPlayer.EditorOn else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+	hudHeader(null if EditorOn and localPlayer == hostPlayer else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
 
 

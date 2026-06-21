@@ -77,7 +77,7 @@ rule "Arrive at Checkpoint":
     eventPlayer.TimeStop += (0.016
         * max(0, min(1, line_segmentXsphere(eventPlayer.PositionOld, eventPlayer.PositionCurrent, Checkpoints.last(), RingSize)
         / distance(eventPlayer.PositionOld, eventPlayer.PositionCurrent))))
-	if eventPlayer.EditorOn: # Don't record editor times
+	if EditorOn: # Don't record editor times
 		return
 
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
@@ -143,7 +143,7 @@ rule "Handle Death":
 
 
 rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
-	@Condition not hostPlayer.EditorOn
+	@Condition not EditorOn
 	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
     bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
     wait(60)

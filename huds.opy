@@ -1,6 +1,7 @@
 #!mainFile "main.opy"
 
 
+
 rule "HUD Setup":
     wait(ELoadOrder.HUDS_GLOBAL)
 
@@ -92,8 +93,25 @@ rule "Remake Leaderboard HUD":
                         LeaderboardText.append(getLastCreatedText())
 
 
+
+rule "Effects Setup":
+    wait(ELoadOrder.EFFECTS)
+    createEffect(localPlayer.filter(lambda _: localPlayer.CheckpointGoal != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.GOAL_CP], localPlayer.CheckpointGoal, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(localPlayer.filter(lambda _: localPlayer.CheckpointAfterNext != 0), Effect.GOOD_AURA, ColorConfig[ECustomize.AFTER_NEXT_CP], localPlayer.CheckpointAfterNext, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    createEffect(localPlayer.filter(lambda _: Checkpoints[localPlayer.CheckpointCurrentIdx] != 0 and localPlayer.EditorCurrentMode > EEditorMode.OFF), Effect.GOOD_AURA, Color.RED, Checkpoints[localPlayer.CheckpointCurrentIdx], RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+
+    # checkpoint icon
+    createIcon( 
+        localPlayer.filter(lambda _: localPlayer.EditorCurrentMode == EEditorMode.OFF and localPlayer.CheckpointGoal != 0 and not localPlayer.isInViewAngle(localPlayer.CheckpointGoal, 4) ), 
+        localPlayer.CheckpointGoal + vect(0,1,0), 
+        Icon.ARROW_DOWN, 
+        IconReeval.VISIBILITY_AND_POSITION, ColorConfig[ECustomize.GOAL_COLOR], true
+    )
+
+
+
 rule "Editor HUD":
-    @Condition hostPlayer.EditorOn
+    @Condition EditorOn
     
 	# Current mode Top HUD
     hudHeader(
@@ -173,14 +191,14 @@ rule "Editor HUD":
 
 	# Editor mode and export buttons
     hudSubtext(
-        hostPlayer if hostPlayer.EditorOn else null, 
+        hostPlayer if EditorOn else null, 
         f"Hold [{inputBindingString(Button.INTERACT)}]: To toggle Editor\nHold [{inputBindingString(Button.INTERACT)} + {inputBindingString(Button.ULTIMATE)}]: To Export Data\n",
         HudPosition.RIGHT, EHudOrder.CONTROLS + 10, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
 
 	# move fast/slow in move mode
     hudSubtext(
-        hostPlayer if hostPlayer.EditorOn and hostPlayer.EditorCurrentMode == EEditorMode.MOVE and hostPlayer.EditingActive else null, 
+        hostPlayer if EditorOn and hostPlayer.EditorCurrentMode == EEditorMode.MOVE and hostPlayer.EditingActive else null, 
         f"Hold [{inputBindingString(Button.PRIMARY_FIRE)}]: Move fast\nHold [{inputBindingString(Button.SECONDARY_FIRE)}]: Move slow",
         HudPosition.RIGHT, EHudOrder.CONTROLS + 10, ColorConfig[ECustomize.CONTROL_HUD_1] , HudReeval.VISIBILITY_AND_STRING
     )
