@@ -17,20 +17,18 @@ def GoToResetPoint(): # go to CurrentCheckpoint
     eventPlayer.teleport(eventPlayer.CheckpointCurrent)
     eventPlayer.startForcingPosition(eventPlayer.CheckpointCurrent)
     wait()
+    eventPlayer.stopForcingPosition()
     if not eventPlayer.EditorCurrentMode:
         eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.CheckpointGoal), Relativity.TO_WORLD)
-    eventPlayer.stopForcingPosition()
 
 
 
 def FullReset():
-    #stopChasingVariable(eventPlayer.Timer)
     eventPlayer.CheckpointCurrentIdx = 0
-    SetCheckpoints()
-    #eventPlayer.Timer = 0
     eventPlayer.TimeStart = 0
     eventPlayer.TimeStop = 0
-    eventPlayer.IsRacing = false
+    eventPlayer.TimeSplitString = []
+    SetCheckpoints()
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
 
     waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
@@ -60,6 +58,23 @@ rule "Arrive at Checkpoint":
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
     eventPlayer.ModifySpeed(3) #$$ TODO: Map adjustable actual speed percent
+
+    #$$ TODO Splits Logic Here
+    eventPlayer.TimeSplit = getTotalTimeElapsed()
+    eventPlayer.TimeSplit -= eventPlayer.TimeStart
+    eventPlayer.TimeSplits[eventPlayer.CheckpointCurrentIdx] = eventPlayer.TimeSplit
+    eventPlayer.TimeSplitString = "{0}{1}".format(eventPlayer.TimeSplitString,
+        "{0}:     {1}{2}{3}{1}     {4}\n".format(
+        eventPlayer.CheckpointCurrentIdx,
+        "", #TagFG,
+        #"A0FFA0FF"
+        "" if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "+", #"FF0040FF",
+        (eventPlayer.TimeSplit - eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx]) if eventPlayer.TimePersonalBest else 0.001,
+        eventPlayer.TimeSplit
+    ))
+    if eventPlayer.CheckpointCurrentIdx >= LiveSplitMaxLines:
+        eventPlayer.TimeSplitString = eventPlayer.TimeSplitString.substring(eventPlayer.TimeSplitString.strIndex('\n') + 1 )
+    #$$ END Splits Logic Here
 
     eventPlayer.CheckpointCurrentIdx += 1
     SetCheckpoints()
@@ -95,6 +110,8 @@ rule "Arrive at Checkpoint":
             return # your time lower than last entry
 
     eventPlayer.TimePersonalBest = eventPlayer.TimeStop.numberString()
+    eventPlayer.TimeSplitsPB = eventPlayer.TimeSplits
+
     # new top 5 if faster or entry doesnt exist yet    
     if (LeaderboardEntries[0][1] > eventPlayer.TimeStop or not LeaderboardEntries[0] or
         LeaderboardEntries[1][1] > eventPlayer.TimeStop or not LeaderboardEntries[1] or

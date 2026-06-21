@@ -44,9 +44,10 @@ playervar CheckpointAfterNext
 playervar TimeStart
 playervar TimeStop
 playervar TimePersonalBest
-#playervar TimeLastSplit
-#playervar TimeSplitArray
-#playervar TimeStringSplits
+playervar TimeSplit
+playervar TimeSplits
+playervar TimeSplitsPB
+playervar TimeSplitString
 playervar PositionOld
 playervar PositionCurrent
 
@@ -114,6 +115,7 @@ enum EHudOrder: # hud ordering
     CREDIT,
     DISC,
     SPD,
+    LIVE_SPLIT,
     TEST_POSITION,
     TEST_LOAD,
 
@@ -121,7 +123,11 @@ enum EHudOrder: # hud ordering
 
     # hud right ###############
     CONTROLS,
-    PERSONAL_BEST,
+    TOP,
+    TOP1,
+    TOP2,
+    TOP3,
+    TOP4,
     TOP5,
 
     RIGHT_END,
@@ -154,6 +160,10 @@ macro Player.ResetSpeed():
     eventPlayer.SetSpeed(BASE_SPEED)
 
 macro Player.CurrentTime = self.TimeStop.numberString() if self.TimeStop else ( ServerTimeElapsed - self.TimeStart if self.TimeStart else 0 )
+macro LiveSplitMaxLines = 10
+macro Player.LiveTime = ServerTimeElapsed - self.TimeStart if self.TimeStart else 0.001
+macro Player.LiveDelta = ServerTimeElapsed - self.TimeStart - self.TimeSplitsPB[self.CheckpointCurrentIdx] if self.TimeStart else 0.001
+
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
     getTotalTimeElapsed() - lastSplit
