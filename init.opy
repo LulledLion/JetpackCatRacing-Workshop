@@ -24,8 +24,7 @@ rule "Init Global":
 
 
     EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
-    if not EditorOn:
-        TagFG.setupTag()
+    #if not EditorOn: TagFG.setupTag() # Used for coloring Live Split
 
 	setMatchTime(900)
 

@@ -24,6 +24,7 @@ globalvar LeaderboardRemake 62 # trigger remake leaderboard
 # Plugins
 globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
+#globalvar TagFG 125
 
 # Player variables
 playervar EditorExport
@@ -174,3 +175,6 @@ macro Player.flyMovementDelta():
     worldVector(self.getThrottle() * Vector.LEFT, self, Transform.ROTATION) +
     Vector.UP * (self.isHoldingButton(Button.JUMP) - self.isHoldingButton(Button.CROUCH))))
 
+macro Variable.setupTag():
+    self = "​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+    self = f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}〼".replace(f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}〼".replace([], []), f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}ࡀ".replace([], []).substring(171, true))
