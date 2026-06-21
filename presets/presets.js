@@ -3,7 +3,8 @@ var result = `macro EDITOR_ON = ${preset === 0}\n`;
 data = {
     /* Key: [ file_path, skirmish_maps, TDM_maps ] */
     example: ["Map_Data.opy", `"workshopExpanse", "workshopIsland"`, `"workshopExpanseNight", "workshopIslandNight"`],
-    1: ["1_LulledLion.opy", `"eichenwalde"`, ``],
+    1: ["1_LulledLionJPC1.opy", `"eichenwalde"`, ``],
+    2: ["2_LulledLionShion1.opy", `"eichenwalde"`, ``],
 }
 if (preset === 0){
     result += "#!define PRESET_SKIRMISH_MAPS /**/\n#!define PRESET_TDM_MAPS /**/\n#!define PRESET_MAP_DATA /**/\n";
