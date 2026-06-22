@@ -88,12 +88,15 @@ rule "Arrive at Checkpoint":
     eventPlayer.IsRacing = false
     eventPlayer.TimeStop = getTotalTimeElapsed()
     eventPlayer.TimeStop -= eventPlayer.TimeStart
+
+    if EditorOn: # Don't record editor times
+        return
+
+    # High precision adjustment
     eventPlayer.TimeStop -= 0.016
     eventPlayer.TimeStop += (0.016
         * max(0, min(1, line_segmentXsphere(eventPlayer.PositionOld, eventPlayer.PositionCurrent, Checkpoints.last(), RingSize)
         / distance(eventPlayer.PositionOld, eventPlayer.PositionCurrent))))
-	if EditorOn: # Don't record editor times
-		return
 
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
         # you already have a time
