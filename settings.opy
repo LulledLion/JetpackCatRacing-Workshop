@@ -4,7 +4,7 @@
 
 settings {
     "main": {
-        "description": "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nWorkshop website: workshop.codes/TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing",
+        "description": f"Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nEditor Code: {Racer.ShareCode}\nDiscord: {Racer.Discord}\nWebsite: {Racer.Website}",
         "modeName": f"Jetpack Cat Racing {VERSION}"
     },
     "lobby": {
@@ -47,7 +47,7 @@ settings {
                 "enableUlt": false
             },
             "enabledHeroes": [
-                "jetpackCat"
+                Racer.String
             ]
         }
     }

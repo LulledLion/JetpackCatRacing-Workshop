@@ -82,7 +82,7 @@ rule "bots: create test bots":
     @Condition bots_on
     TestBotArray = []
     while len(TestBotArray) < testbot_number:
-        createDummy(Hero.JETPACK_CAT, test_team, -1, null, null)
+        createDummy(Racer.Hero, test_team, -1, null, null)
         TestBotArray.append(getLastCreatedEntity())
         wait(0.1)
         TestBotArray[len(TestBotArray)-1].startForcingName("test bot {0}".format(len(TestBotArray)-1))
