@@ -49,7 +49,6 @@ rule "Init Player":
 
 
 rule "Server Time Elapsed":
-    @Condition EditorOn
     ServerTimeElapsed = getTotalTimeElapsed()
     wait(0)
     loop

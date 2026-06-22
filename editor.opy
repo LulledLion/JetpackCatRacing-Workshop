@@ -64,6 +64,7 @@ rule "Editor | Export Data":
 	CreatorName = null
 	MapCode = null
 	RestartLobbyTime = null
+    ServerTimeElapsed = null
     enableInspector()
     disableInspector()
     EditorOn = true
