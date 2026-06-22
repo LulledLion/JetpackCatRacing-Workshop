@@ -40,8 +40,16 @@ settings
 			{
 				Frenetic Flight Recharge Rate: 500%
 				Frenetic Flight Unlimited Fuel: On
+				Movement Speed: 195%
 				Ultimate Ability Catnapper: Off
 				No Ammunition Requirement: On
+			}
+			Shion
+			{
+				Execution Cooldown Time: 0%
+				Joyride Cooldown Time: 0%
+				Joyride Duration Scalar: 500%
+				Ultimate Ability Satsuriku Spree: Off
 			}
 			enabled heroes
 			{
@@ -272,16 +280,16 @@ rule ("Init Global") {
         Disable Built-In Game Mode Scoring;
         Set Global Variable(RestartLobbyTime, Subtract(Add(Multiply(Workshop Setting Toggle(Custom String("Lobby Setting"), Custom String("Infinite Lobby Time"), False, 1), 999999999999), Workshop Setting Integer(Custom String("Lobby Setting"), Custom String("Restart Lobby After X minutes"), 15, 1, 60, 0)), 1));
         Wait(1, Ignore Condition);
+        Set Match Time(900);
         Start Forcing Spawn Room(All Teams, 0);
         Start Forcing Spawn Room(All Teams, 1);
         Start Forcing Spawn Room(All Teams, 2);
         Stop Forcing Spawn Room(All Teams);
-        Set Global Variable(LeaderboardText, Null);
-        Set Global Variable(LeaderboardEntries, Empty Array);
-        Set Global Variable(LeaderboardRemake, Null);
         Set Global Variable(EditorOn, Workshop Setting Toggle(Custom String("Editor"), Custom String("Editor Mode Enabled"), True, 0));
-        "if not EditorOn: TagFG.setupTag() # Used for coloring Live Split"
-        Set Match Time(900);
+        If(Not(Global.EditorOn));
+            "LeaderboardText = null\nLeaderboardRemake = null"
+            Set Global Variable(LeaderboardEntries, Empty Array);
+        End;
         Wait(0.512, Ignore Condition);
         If(Compare(Global.Checkpoints, ==, 0));
             Set Global Variable(Checkpoints, Empty Array);
@@ -378,7 +386,7 @@ rule ("HUD Setup") {
         "Left"
         Create HUD Text(Local Player, Hero Icon String(Hero(Jetpack Cat)), Custom String("Made By: {0}                                                                                                    ", Global.CreatorName), Custom String("Map Code: {0}                                                                                                    ", Global.MapCode), Left, 9, Color(Sky Blue), First Of(Global.ColorConfig), Value In Array(Global.ColorConfig, 1), Visible To, Default Visibility);
         Create HUD Text(Local Player, Null, Custom String("Discord: dsc.gg/jetpack                                                                                                    "), Null, Left, 10, Null, Value In Array(Global.ColorConfig, 2), Null, Visible To, Default Visibility);
-        Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: {1}%                                                                                                    ", Icon String(Bolt), Round To Integer(Add(Multiply(0.5, (Local Player).Speed), 2.667), To Nearest))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
+        Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: {1}%                                                                                                    ", Icon String(Bolt), Round To Integer((Local Player).Speed, To Nearest))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
         Create HUD Text(Local Player, Null, Custom String("\n{0} Personal best: {1}\nLvl      PB       Split\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Ability 2)), If-Then-Else((Local Player).TimePersonalBest, (Local Player).TimePersonalBest, Custom String(" —")), Custom String("{0}{1}                                                                                                    ", (Local Player).TimeSplitString, If-Then-Else((Local Player).TimeStop, Empty Array, Custom String("{0}:     {1}{2}", (Local Player).CheckpointCurrentIdx, If-Then-Else(Compare(Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), <=, 0), Custom String(""), Custom String("+")), Custom String("{0}     {1}", If-Then-Else((Local Player).TimePersonalBest, If-Then-Else((Local Player).TimeStart, Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), 0.001), 0.001), If-Then-Else((Local Player).TimeStart, Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), 0.001)))))), Null, Left, 12, Null, Color(White), Null, Visible To and String, Default Visibility);
         "Center"
         Create HUD Text(If-Then-Else((Host Player).EditorShowingExportInstructions, Null, Local Player), If-Then-Else((Local Player).IsRacing, Icon String(Arrow: Right), If-Then-Else(Compare((Local Player).CheckpointCurrentIdx, ==, 0), Icon String(Flag), Icon String(Checkmark))), Custom String("{0} / {1}", (Local Player).CheckpointCurrentIdx, Subtract(Count Of(Global.Checkpoints), 1)), Custom String("Time: {0}", If-Then-Else((Local Player).TimeStop, Custom String("{0}.{1}", Round To Integer((Local Player).TimeStop, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(1, (Local Player).TimeStop), Round To Integer((Local Player).TimeStop, Down)), 10000), Up)), 1, 4)), If-Then-Else((Local Player).TimeStart, Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), 0))), Top, 0, Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
@@ -483,7 +491,7 @@ rule ("Subroutine GoToResetPoint") {
         GoToResetPoint;
     }
     actions {
-        Set Player Variable(Event Player, Speed, 195);
+        Set Player Variable(Event Player, Speed, 100);
         Set Move Speed(Event Player, (Event Player).Speed);
         "If there's no checkpoint set then ignore it"
         If(Compare((Event Player).CheckpointCurrent, ==, Null));
@@ -550,7 +558,7 @@ rule ("Arrive at Checkpoint") {
     actions {
         Play Effect(Event Player, Buff Explosion Sound, Color(White), Eye Position(Event Player), 100);
         "$$ TODO: Map adjustable actual speed percent"
-        Modify Player Variable(Event Player, Speed, Add, 3);
+        Modify Player Variable(Event Player, Speed, Add, 1.5);
         "$$ TODO: Map adjustable actual speed percent"
         Set Move Speed(Event Player, (Event Player).Speed);
         "$$ TODO Splits Logic Here"
@@ -572,10 +580,11 @@ rule ("Arrive at Checkpoint") {
         Set Player Variable(Event Player, IsRacing, False);
         Set Player Variable(Event Player, TimeStop, Total Time Elapsed);
         Modify Player Variable(Event Player, TimeStop, Subtract, (Event Player).TimeStart);
-        Modify Player Variable(Event Player, TimeStop, Subtract, 0.016);
-        Modify Player Variable(Event Player, TimeStop, Add, Multiply(0.016, Max(0, Min(1, Divide(Mapped Array(Array(Multiply(2.0, Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Direction Towards((Event Player).PositionOld, (Event Player).PositionCurrent)))), Multiply(-0.5, Add(Current Array Element, Square Root(Subtract(Multiply(Current Array Element, Current Array Element), Multiply(4.0, Subtract(Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld)), Multiply(Global.RingSize, Global.RingSize)))))))), Distance Between((Event Player).PositionOld, (Event Player).PositionCurrent))))));
         "Don't record editor times"
         Abort If(Global.EditorOn);
+        "High precision adjustment"
+        Modify Player Variable(Event Player, TimeStop, Subtract, 0.016);
+        Modify Player Variable(Event Player, TimeStop, Add, Multiply(0.016, Max(0, Min(1, Divide(Mapped Array(Array(Multiply(2.0, Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Direction Towards((Event Player).PositionOld, (Event Player).PositionCurrent)))), Multiply(-0.5, Add(Current Array Element, Square Root(Subtract(Multiply(Current Array Element, Current Array Element), Multiply(4.0, Subtract(Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld)), Multiply(Global.RingSize, Global.RingSize)))))))), Distance Between((Event Player).PositionOld, (Event Player).PositionCurrent))))));
         If(Array Contains(Mapped Array(Global.LeaderboardEntries, First Of(Current Array Element)), Custom String("{0}", Event Player)));
             "you already have a time"
             If(Compare((Event Player).TimeStop, >, Value In Array(First Of(Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player)))), 1)));
@@ -769,6 +778,7 @@ rule ("Editor | Export Data") {
         Set Global Variable(CreatorName, Null);
         Set Global Variable(MapCode, Null);
         Set Global Variable(RestartLobbyTime, Null);
+        Set Global Variable(ServerTimeElapsed, Null);
         Enable Inspector Recording;
         Disable Inspector Recording;
         Set Global Variable(EditorOn, True);
