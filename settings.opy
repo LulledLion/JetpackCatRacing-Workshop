@@ -40,6 +40,12 @@ settings {
                 "enableUlt": false,
                 "enableInfiniteAmmo": true
             },
+            "shion": {
+                "secondaryFireCooldown%": 0,
+                "ability2Cooldown%": 0,
+                "ability2Duration%": 500,
+                "enableUlt": false
+            },
             "enabledHeroes": [
                 "jetpackCat"
             ]
