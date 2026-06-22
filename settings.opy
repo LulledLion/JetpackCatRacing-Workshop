@@ -44,7 +44,8 @@ settings {
                 "secondaryFireCooldown%": 0,
                 "ability2Cooldown%": 0,
                 "ability2Duration%": 500,
-                "enableUlt": false
+                "enableUlt": false,
+                "enableInfiniteAmmo": true
             },
             "enabledHeroes": [
                 Racer.String
