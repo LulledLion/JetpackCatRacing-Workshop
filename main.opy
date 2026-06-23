@@ -1,4 +1,4 @@
-#!optimizeStrict
+#!optimizeForSize
 ##!writeToOutputFile
 
 # warnings ###################
