@@ -9,17 +9,22 @@ def SetCheckpoints():
 
 def GoToResetPoint(): # go to CurrentCheckpoint
     eventPlayer.ResetSpeed()
-	# If there's no checkpoint set then ignore it
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, false)
+
+    # If there's no checkpoint set then ignore it
 	if eventPlayer.CheckpointCurrent == null:
 		eventPlayer.respawn()
 		return
+
+    if not eventPlayer.EditorCurrentMode:
+        eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.CheckpointGoal), Relativity.TO_WORLD)
 
     eventPlayer.teleport(eventPlayer.CheckpointCurrent)
     eventPlayer.startForcingPosition(eventPlayer.CheckpointCurrent)
     wait()
     eventPlayer.stopForcingPosition()
-    if not eventPlayer.EditorCurrentMode:
-        eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.CheckpointGoal), Relativity.TO_WORLD)
+    
 
 
 
@@ -30,8 +35,17 @@ def FullReset():
     eventPlayer.TimeSplitString = []
     SetCheckpoints()
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
-
-    waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setMoveSpeed(0)
+        if eventPlayer.isUsingAbility2():
+            eventPlayer.cancelPrimaryAction()
+            wait(0.016 * 17)
+        wait(0.016 * 5)
+        #eventPlayer.forceButtonPress(Button.ABILITY_2)
+        waitUntil((eventPlayer.isUsingAbility1() or eventPlayer.isUsingAbility2()) and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
+        eventPlayer.setMoveSpeed(100)
+    elif Racer.Hero == Hero.JETPACKCAT:
+        waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
     eventPlayer.IsRacing = true
     if len(Checkpoints) <= 1:
         return
@@ -55,10 +69,12 @@ rule "Arrive at Checkpoint":
     @Condition eventPlayer.isAlive()
     @Condition distance(eventPlayer.CheckpointGoal, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
+    eventPlayer.ModifySpeed(1.5) #$$ TODO: Map adjustable actual speed percent
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, false)
+
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.ModifySpeed(1.5) #$$ TODO: Map adjustable actual speed percent
-
     #$$ TODO Splits Logic Here
     eventPlayer.TimeSplit = getTotalTimeElapsed()
     eventPlayer.TimeSplit -= eventPlayer.TimeStart
@@ -68,7 +84,7 @@ rule "Arrive at Checkpoint":
         eventPlayer.CheckpointCurrentIdx,
         "", #TagFG,
         #"A0FFA0FF"
-        "" if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "+", #"FF0040FF",
+        [] if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "+", #"FF0040FF",
         (eventPlayer.TimeSplit - eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx]) if eventPlayer.TimePersonalBest else 0.001,
         eventPlayer.TimeSplit
     ))

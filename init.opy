@@ -41,9 +41,9 @@ rule "Init Player":
     eventPlayer.disableGamemodeInWorldUi()
     eventPlayer.disableMessages()
     eventPlayer.disablePlayerCollision()
-    eventPlayer.setAbility1Enabled(false)
 
     waitUntil(getTotalTimeElapsed() > ELoadOrder.PLAYER_INIT, ELoadOrder.PLAYER_INIT) # map variables need to load first
+    waitUntil(eventPlayer.hasSpawned())
     wait(0.128)
     FullReset()
 
