@@ -27,7 +27,7 @@ rule "HUD Setup":
             localPlayer.CheckpointCurrentIdx,
             "", #TagFG,
             #"A0FFA0FF"
-            "" if ServerTimeElapsed - localPlayer.TimeStart - localPlayer.TimeSplitsPB[localPlayer.CheckpointCurrentIdx] <= 0 else "+", #"FF0040FF",
+            [] if ServerTimeElapsed - localPlayer.TimeStart - localPlayer.TimeSplitsPB[localPlayer.CheckpointCurrentIdx] <= 0 else "+", #"FF0040FF",
             localPlayer.LiveDelta if localPlayer.TimePersonalBest else 0.001,
             localPlayer.LiveTime
         ),
