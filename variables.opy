@@ -13,8 +13,8 @@ globalvar ColorConfig 22
 
 # Workshop Settings
 globalvar RestartLobbyTime 50
-# globalvar InfiniteLobbyTime 51 #$$ Remove
-globalvar ServerTimeElapsed
+globalvar ServerTimeElapsed 51
+globalvar EditorOn 52
 
 # HUD Related
 globalvar LeaderboardText 60 # txt entities
@@ -24,41 +24,45 @@ globalvar LeaderboardRemake 62 # trigger remake leaderboard
 # Plugins
 globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
+#globalvar TagFG 125
 
 # Player variables
-
-playervar WsEditorOn
-playervar CurrentEditorMode
-#playervar Timer
-playervar StartTime
-playervar StopTime
-playervar PersonalBest
-playervar OldPosition
-playervar CurrentPosition
-playervar IsRacing
-playervar SpeedMultiplier
-playervar CurrentCheckpointIdx
-playervar GoalCheckpoint
-playervar AfterNextCheckpoint
-playervar CurrentCheckpoint
-playervar ActivelyEditing
+playervar EditorExport
+playervar EditorCurrentMode
+playervar EditingActive
 playervar EditCheckpointEffect
 playervar EditCheckpointTemp
 playervar EditMeleeButtonPressed
-playervar IsMovingCheckpoint
-playervar ShouldShowExportInstructions
+playervar EditorIsMovingCheckpoint
+playervar EditorShowingExportInstructions
+
+playervar CheckpointCurrentIdx
+playervar CheckpointCurrent
+playervar CheckpointGoal
+playervar CheckpointAfterNext
+
+playervar TimeStart
+playervar TimeStop
+playervar TimePersonalBest
+playervar TimeSplit
+playervar TimeSplits
+playervar TimeSplitsPB
+playervar TimeSplitString
+playervar PositionOld
+playervar PositionCurrent
+
+playervar IsRacing
+playervar Speed
 
 # Subroutines
 subroutine FullReset
 subroutine GoToResetPoint # teleport back to lastpoint
-subroutine ResetSpeed
 subroutine StartEditorCamera
 subroutine StartEditorCamera2
 subroutine StopEditorCamera
 subroutine DisableAbilities
 subroutine EnableAbilities
 subroutine SetCheckpoints
-# subroutine LeaderboardUpdate #$$ Remove
 
 # testscripts disable: ##, enable: #
 #!define test_script ##
@@ -111,6 +115,7 @@ enum EHudOrder: # hud ordering
     CREDIT,
     DISC,
     SPD,
+    LIVE_SPLIT,
     TEST_POSITION,
     TEST_LOAD,
 
@@ -118,7 +123,11 @@ enum EHudOrder: # hud ordering
 
     # hud right ###############
     CONTROLS,
-    PERSONAL_BEST,
+    TOP,
+    TOP1,
+    TOP2,
+    TOP3,
+    TOP4,
     TOP5,
 
     RIGHT_END,
@@ -131,16 +140,33 @@ enum EEditorMode:
     REMOVE = 4,
 
 macro Float.numberString(precision = 4, truncate = 2):
-    # Max Precision 7
+    # Precision: Min 3 Max 7
     # Truncate: 0=Floor 1=Round 2=Ceil
-    ("{}.{}".format(floor(self), ((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 0 else
-    "{}.{}".format(floor(self), round((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 1 else
-    "{}.{}".format(floor(self), ceil((1 + self - floor(self)) * 10 ** precision)[0].substring(1, precision)) if truncate == 2 else self)
+    "{0}.{1}".format(floor(self),
+    (((1 + self - floor(self)) * 10 ** precision) if truncate == 0 else
+    round((1 + self - floor(self)) * 10 ** precision) if truncate == 1 else
+    ceil((1 + self - floor(self)) * 10 ** precision) if truncate == 2 else [])
+    [0].substring(1, precision))
 
-macro Player.CurrentTime = self.StopTime.numberString() if self.StopTime else ( ServerTimeElapsed - self.StartTime if self.StartTime else 0 )
+macro BASE_SPEED = 100
+macro Player.getSpeedPercent = round(self.Speed)
+macro Player.SetSpeed(speed):
+    self.Speed = speed
+    self.setMoveSpeed(self.Speed)
+macro Player.ModifySpeed(modifier):
+    self.Speed += modifier
+    self.SetSpeed(self.Speed)
+macro Player.ResetSpeed():
+    eventPlayer.SetSpeed(BASE_SPEED)
+
+macro Player.CurrentTime = self.TimeStop.numberString() if self.TimeStop else ( ServerTimeElapsed - self.TimeStart if self.TimeStart else 0 )
+macro LiveSplitMaxLines = 10
+macro Player.LiveTime = ServerTimeElapsed - self.TimeStart if self.TimeStart else 0.001
+macro Player.LiveDelta = ServerTimeElapsed - self.TimeStart - self.TimeSplitsPB[self.CheckpointCurrentIdx] if self.TimeStart else 0.001
+
 macro Player.getSplit(lastSplit = 0):
     # TODO Not functional
-    getTotalTimeElapsed() - self.StartTime - lastSplit
+    getTotalTimeElapsed() - lastSplit
 
 macro line_segmentXsphere(v1, v2, c0, r):
     # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
@@ -159,3 +185,6 @@ macro Player.flyMovementDelta():
     worldVector(self.getThrottle() * Vector.LEFT, self, Transform.ROTATION) +
     Vector.UP * (self.isHoldingButton(Button.JUMP) - self.isHoldingButton(Button.CROUCH))))
 
+macro Variable.setupTag():
+    self = "​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+    self = f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}〼".replace(f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}〼".replace([], []), f"​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{self}ࡀ".replace([], []).substring(171, true))

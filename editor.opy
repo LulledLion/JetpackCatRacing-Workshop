@@ -2,305 +2,287 @@
 
 rule "Editor | Enable Checkpoint Selection":
     @Event eachPlayer
+    @Condition EditorOn
     @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-	@Condition not eventPlayer.ShouldShowExportInstructions
-    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
-	@Condition not eventPlayer.isHoldingButton(Button.ULTIMATE)
+	@Condition not hostPlayer.EditorShowingExportInstructions
+    @Condition hostPlayer.isHoldingButton(Button.INTERACT)
+	@Condition not hostPlayer.isHoldingButton(Button.ULTIMATE)
 
 	
-	if eventPlayer.IsMovingCheckpoint:
-		smallMessage(eventPlayer, "   {0} Checkpoint Movement Cancelled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
-		playEffect(eventPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	if hostPlayer.EditorIsMovingCheckpoint:
+		smallMessage(hostPlayer, "   {0} Checkpoint Movement Cancelled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
+		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 		StartEditorCamera()
-		eventPlayer.EditCheckpointTemp = null
-		destroyEffect(eventPlayer.EditCheckpointEffect)
-		eventPlayer.IsMovingCheckpoint = false
-		eventPlayer.ActivelyEditing = false
+		hostPlayer.EditCheckpointTemp = null
+		destroyEffect(hostPlayer.EditCheckpointEffect)
+		hostPlayer.EditorIsMovingCheckpoint = false
+		hostPlayer.EditingActive = false
 		return
 
 	wait(0.5, Wait.ABORT_WHEN_FALSE)
-    eventPlayer.StartTime = 0
-    eventPlayer.StopTime = 0
+    hostPlayer.TimeStop = 0
 	# If there's no checkpoints, create 1 at the player's position
     if len(Checkpoints) == 0:
-        Checkpoints[0] = eventPlayer.getPosition()
-        eventPlayer.CurrentCheckpointIdx = 0
+        Checkpoints[0] = hostPlayer.getPosition()
+        hostPlayer.CheckpointCurrentIdx = 0
         SetCheckpoints()
 
-	eventPlayer.CurrentEditorMode = EEditorMode.MOVE if eventPlayer.CurrentEditorMode == EEditorMode.OFF else EEditorMode.OFF
+	hostPlayer.EditorCurrentMode = EEditorMode.MOVE if hostPlayer.EditorCurrentMode == EEditorMode.OFF else EEditorMode.OFF
 
-	# Entering edit mode: Start the camera and stop the timer 
-    if eventPlayer.CurrentEditorMode > EEditorMode.OFF:
+    if hostPlayer.EditorCurrentMode > EEditorMode.OFF: # Entering edit mode: Start the camera and stop the timer
+        hostPlayer.TimeStart = 0
         StartEditorCamera()
-		# stop timer
-		#stopChasingVariable(eventPlayer.Timer)
         wait(0.1)
-		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-	# Exiting edit mode: Stop the camera and continue the timer
-    else:
-		eventPlayer.ActivelyEditing = false
-		destroyEffect(eventPlayer.EditCheckpointEffect)
+		playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
+    else: # Exiting edit mode: Stop the camera and continue the timer
+        hostPlayer.TimeStart = getTotalTimeElapsed()
+		hostPlayer.EditingActive = false
+		destroyEffect(hostPlayer.EditCheckpointEffect)
         StopEditorCamera()
-		eventPlayer.IsMovingCheckpoint = false
-		# start timer
-		#if len(Checkpoints) > 1:
-		#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
-        #if eventPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
-        #    eventPlayer.IsRacing = true
-		eventPlayer.teleport(Checkpoints[eventPlayer.CurrentCheckpointIdx])
+		hostPlayer.EditorIsMovingCheckpoint = false
+        #if hostPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
+        #    hostPlayer.IsRacing = true
+		hostPlayer.teleport(Checkpoints[hostPlayer.CheckpointCurrentIdx])
 		wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
 
 
 rule "Editor | Export Data":
     @Event global # Forces 'Variable Target' to be Global
-    @Condition hostPlayer.WsEditorOn
+    @Condition EditorOn
 	# @Condition hostPlayer.CurrentEditorMode == EEditorMode.OFF 
     @Condition hostPlayer.isHoldingButton(Button.INTERACT)
 	@Condition hostPlayer.isHoldingButton(Button.ULTIMATE)
-	@Condition not hostPlayer.ShouldShowExportInstructions
+	@Condition not hostPlayer.EditorShowingExportInstructions
 	
     wait(0.5, Wait.ABORT_WHEN_FALSE)
-    #$$ Remove
-	# smallMessage(hostPlayer, "   Map Data Exporting...")
-	# playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
-	hostPlayer.ShouldShowExportInstructions = true
-    LeaderboardText = null
-    LeaderboardEntries = null
-    LeaderboardRemake = null
+    hostPlayer.EditorShowingExportInstructions = true
+    hostPlayer.EditorExport = [ColorConfig, CreatorName, MapCode]
+    EditorOn = null
     ColorConfig = null
 	CreatorName = null
 	MapCode = null
 	RestartLobbyTime = null
-	# InfiniteLobbyTime = null #$$ Remove
+    ServerTimeElapsed = null
     enableInspector()
     disableInspector()
+    EditorOn = true
+    ColorConfig = hostPlayer.EditorExport[0]
+    CreatorName = hostPlayer.EditorExport[1]
+	MapCode = hostPlayer.EditorExport.last()
     smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")
-	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[hostPlayer.CurrentCheckpointIdx], 100)
+	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.EditorCurrentMode == EEditorMode.OFF else Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 
 rule "Editor | Hide Export instruction":
-	@Event eachPlayer
-    @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-    @Condition eventPlayer.isHoldingButton(Button.MELEE)
-	@Condition eventPlayer.ShouldShowExportInstructions
-	@Condition not eventPlayer.EditMeleeButtonPressed
+    @Condition EditorOn
+    @Condition hostPlayer.isHoldingButton(Button.MELEE)
+	@Condition hostPlayer.EditorShowingExportInstructions
+	@Condition not hostPlayer.EditMeleeButtonPressed
 
-	eventPlayer.EditMeleeButtonPressed = true
-	eventPlayer.ShouldShowExportInstructions = false
-	playEffect(eventPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getPosition() if eventPlayer.CurrentEditorMode == EEditorMode.OFF else Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	hostPlayer.EditMeleeButtonPressed = true
+	hostPlayer.EditorShowingExportInstructions = false
+	playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.EditorCurrentMode == EEditorMode.OFF else Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 
 
 rule "Editor | Select Checkpoint & Mode":
     @Event eachPlayer
+    @Condition EditorOn
     @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode > EEditorMode.OFF
-	@Condition not eventPlayer.ActivelyEditing
-    @Condition (eventPlayer.getThrottle().z > 0.5 or eventPlayer.getThrottle().z < -0.5 or 
-            	eventPlayer.getThrottle().x > 0.5 or eventPlayer.getThrottle().x < -0.5)
+	@Condition hostPlayer.EditorCurrentMode > EEditorMode.OFF
+	@Condition not hostPlayer.EditingActive
+    @Condition (hostPlayer.getThrottle().z > 0.5 or hostPlayer.getThrottle().z < -0.5 or 
+            	hostPlayer.getThrottle().x > 0.5 or hostPlayer.getThrottle().x < -0.5)
 	
-	if eventPlayer.EditMeleeButtonPressed:
+	if hostPlayer.EditMeleeButtonPressed:
 		return
 
-    if eventPlayer.getThrottle().z > 0.5:
-        eventPlayer.CurrentCheckpointIdx += 1
-        if eventPlayer.CurrentCheckpointIdx >= len(Checkpoints):
-            eventPlayer.CurrentCheckpointIdx = 0
+    if hostPlayer.getThrottle().z > 0.5:
+        hostPlayer.CheckpointCurrentIdx += 1
+        if hostPlayer.CheckpointCurrentIdx >= len(Checkpoints):
+            hostPlayer.CheckpointCurrentIdx = 0
 
-    elif eventPlayer.getThrottle().z < -0.5:
-        eventPlayer.CurrentCheckpointIdx -= 1
-        if eventPlayer.CurrentCheckpointIdx < 0:
-            eventPlayer.CurrentCheckpointIdx = len(Checkpoints) - 1
+    elif hostPlayer.getThrottle().z < -0.5:
+        hostPlayer.CheckpointCurrentIdx -= 1
+        if hostPlayer.CheckpointCurrentIdx < 0:
+            hostPlayer.CheckpointCurrentIdx = len(Checkpoints) - 1
     
-    elif eventPlayer.getThrottle().x > 0.5:
-        eventPlayer.CurrentEditorMode += 1
-        if eventPlayer.CurrentEditorMode >= len(EEditorMode):
-            eventPlayer.CurrentEditorMode = EEditorMode.MOVE
+    elif hostPlayer.getThrottle().x > 0.5:
+        hostPlayer.EditorCurrentMode += 1
+        if hostPlayer.EditorCurrentMode >= len(EEditorMode):
+            hostPlayer.EditorCurrentMode = EEditorMode.MOVE
 
-    elif eventPlayer.getThrottle().x < -0.5:
-        eventPlayer.CurrentEditorMode -= 1
-        if eventPlayer.CurrentEditorMode < EEditorMode.MOVE:
-            eventPlayer.CurrentEditorMode = len(EEditorMode) - 1
+    elif hostPlayer.getThrottle().x < -0.5:
+        hostPlayer.EditorCurrentMode -= 1
+        if hostPlayer.EditorCurrentMode < EEditorMode.MOVE:
+            hostPlayer.EditorCurrentMode = len(EEditorMode) - 1
     
     SetCheckpoints()
 
 	wait(0.1)
-	playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	playEffect(hostPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 
 
 rule "Editor | Enable Checkpoint Edit":
     @Event eachPlayer
+    @Condition EditorOn
     @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.MOVE
-	@Condition eventPlayer.isHoldingButton(Button.MELEE)
-	@Condition not eventPlayer.EditMeleeButtonPressed
+    @Condition hostPlayer.EditorCurrentMode == EEditorMode.MOVE
+	@Condition hostPlayer.isHoldingButton(Button.MELEE)
+	@Condition not hostPlayer.EditMeleeButtonPressed
 
-	eventPlayer.EditMeleeButtonPressed = true
-    eventPlayer.ActivelyEditing = not eventPlayer.ActivelyEditing
+	hostPlayer.EditMeleeButtonPressed = true
+    hostPlayer.EditingActive = not hostPlayer.EditingActive
     
-	if eventPlayer.ActivelyEditing:
-        smallMessage(eventPlayer, "   {0} Checkpoint Moving Enabled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
-		playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	if hostPlayer.EditingActive:
+        smallMessage(hostPlayer, "   {0} Checkpoint Moving Enabled".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
+		playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
         StartEditorCamera2()
-        eventPlayer.EditCheckpointTemp = Checkpoints[eventPlayer.CurrentCheckpointIdx]
-        createEffect(eventPlayer, Effect.GOOD_AURA, Color.ROSE, eventPlayer.EditCheckpointTemp, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-        eventPlayer.EditCheckpointEffect = getLastCreatedEntity()
-		eventPlayer.IsMovingCheckpoint = true
+        hostPlayer.EditCheckpointTemp = Checkpoints[hostPlayer.CheckpointCurrentIdx]
+        createEffect(hostPlayer, Effect.GOOD_AURA, Color.ROSE, hostPlayer.EditCheckpointTemp, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+        hostPlayer.EditCheckpointEffect = getLastCreatedEntity()
+		hostPlayer.EditorIsMovingCheckpoint = true
     else:
-        smallMessage(eventPlayer, "   {0} Checkpoint Placed".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
-		playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, eventPlayer.EditCheckpointTemp, 100)
+        smallMessage(hostPlayer, "   {0} Checkpoint Placed".format(abilityIconString(Hero.SYMMETRA, Button.ABILITY_2)))
+		playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.EditCheckpointTemp, 100)
         StartEditorCamera()
-        Checkpoints[eventPlayer.CurrentCheckpointIdx] = eventPlayer.EditCheckpointTemp
+        Checkpoints[hostPlayer.CheckpointCurrentIdx] = hostPlayer.EditCheckpointTemp
         SetCheckpoints()
-        eventPlayer.EditCheckpointTemp = null
-        destroyEffect(eventPlayer.EditCheckpointEffect)
-		eventPlayer.IsMovingCheckpoint = false
+        hostPlayer.EditCheckpointTemp = null
+        destroyEffect(hostPlayer.EditCheckpointEffect)
+		hostPlayer.EditorIsMovingCheckpoint = false
 
 
 
 rule "Editor | Start Editing Position":
-    @Event eachPlayer
-    @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.MOVE
-	@Condition eventPlayer.ActivelyEditing
-	@Condition not eventPlayer.EditMeleeButtonPressed
+    @Condition EditorOn
+    @Condition hostPlayer.EditorCurrentMode == EEditorMode.MOVE
+	@Condition hostPlayer.EditingActive
+	@Condition not hostPlayer.EditMeleeButtonPressed
 
-    while not hostPlayer.isHoldingButton(Button.MELEE) and eventPlayer.ActivelyEditing:
-        eventPlayer.EditCheckpointTemp += eventPlayer.flyMovementDelta()
+    while not hostPlayer.isHoldingButton(Button.MELEE) and hostPlayer.EditingActive:
+        hostPlayer.EditCheckpointTemp += hostPlayer.flyMovementDelta()
         wait(0)
 
 
 rule "Editor | Remove Checkpoint":
     @Event eachPlayer
+    @Condition EditorOn
     @Condition eventPlayer == hostPlayer
-    @Condition hostPlayer.WsEditorOn
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.REMOVE
-	@Condition eventPlayer.isHoldingButton(Button.MELEE)
-	@Condition not eventPlayer.EditMeleeButtonPressed
+    @Condition hostPlayer.EditorCurrentMode == EEditorMode.REMOVE
+	@Condition hostPlayer.isHoldingButton(Button.MELEE)
+	@Condition not hostPlayer.EditMeleeButtonPressed
 
 	wait(0.5, Wait.ABORT_WHEN_FALSE)
     
-	eventPlayer.EditMeleeButtonPressed = true
-    del Checkpoints[eventPlayer.CurrentCheckpointIdx]
+	hostPlayer.EditMeleeButtonPressed = true
+    del Checkpoints[hostPlayer.CheckpointCurrentIdx]
     
 	# If deleted the last checkpoint, reset the first checkpoint to be the player's current position
 	if len(Checkpoints) == 0:
-		eventPlayer.CurrentEditorMode = EEditorMode.OFF
-		eventPlayer.ActivelyEditing = false
+		hostPlayer.EditorCurrentMode = EEditorMode.OFF
+		hostPlayer.EditingActive = false
         StopEditorCamera()
-		eventPlayer.CurrentCheckpointIdx = 0
-		smallMessage(eventPlayer, "   {0} No Checkpoints left to remove".format(iconString(Icon.TRASHCAN)))
-		playEffect(eventPlayer, DynamicEffect.DEBUFF_IMPACT_SOUND, Color.WHITE, eventPlayer.getPosition(), 100)
+		hostPlayer.CheckpointCurrentIdx = 0
+		smallMessage(hostPlayer, "   {0} No Checkpoints left to remove".format(iconString(Icon.TRASHCAN)))
+		playEffect(hostPlayer, DynamicEffect.DEBUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
 		return
 
-	if eventPlayer.CurrentCheckpointIdx >= len(Checkpoints):
-		eventPlayer.CurrentCheckpointIdx = len(Checkpoints) - 1
+	if hostPlayer.CheckpointCurrentIdx >= len(Checkpoints):
+		hostPlayer.CheckpointCurrentIdx = len(Checkpoints) - 1
 
 	SetCheckpoints()
 
 	wait(0.1)
-	smallMessage(eventPlayer, "   {0} Checkpoint Removed".format(iconString(Icon.TRASHCAN)))
-	playEffect(eventPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	smallMessage(hostPlayer, "   {0} Checkpoint Removed".format(iconString(Icon.TRASHCAN)))
+	playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 
 
 rule "Editor | Insert Checkpoint (After Current Checkpoint)":
     @Event eachPlayer
-    @Condition hostPlayer.WsEditorOn
+    @Condition EditorOn
     @Condition eventPlayer == hostPlayer
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.INSERT
-	@Condition eventPlayer.isHoldingButton(Button.MELEE)
-    @Condition not eventPlayer.EditMeleeButtonPressed
+    @Condition hostPlayer.EditorCurrentMode == EEditorMode.INSERT
+	@Condition hostPlayer.isHoldingButton(Button.MELEE)
+    @Condition not hostPlayer.EditMeleeButtonPressed
 
-	smallMessage(eventPlayer, "   {0} Checkpoint Inserted".format(iconString(Icon.HALO)))
-	playEffect(eventPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, Checkpoints[eventPlayer.CurrentCheckpointIdx], 100)
+	smallMessage(hostPlayer, "   {0} Checkpoint Inserted".format(iconString(Icon.HALO)))
+	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
-	eventPlayer.EditMeleeButtonPressed = true
-    Checkpoints.insertAt(eventPlayer.CurrentCheckpointIdx, Checkpoints[eventPlayer.CurrentCheckpointIdx])
-    eventPlayer.CurrentCheckpointIdx += 1
+	hostPlayer.EditMeleeButtonPressed = true
+    Checkpoints.insertAt(hostPlayer.CheckpointCurrentIdx, Checkpoints[hostPlayer.CheckpointCurrentIdx])
+    hostPlayer.CheckpointCurrentIdx += 1
     SetCheckpoints()
-    eventPlayer.CurrentEditorMode = EEditorMode.MOVE
-    eventPlayer.ActivelyEditing = true
+    hostPlayer.EditorCurrentMode = EEditorMode.MOVE
+    hostPlayer.EditingActive = true
     StartEditorCamera2()
-    eventPlayer.EditCheckpointTemp = Checkpoints[eventPlayer.CurrentCheckpointIdx]
-    createEffect(eventPlayer, Effect.GOOD_AURA, Color.ROSE, eventPlayer.EditCheckpointTemp, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
-    eventPlayer.EditCheckpointEffect = getLastCreatedEntity()
-	eventPlayer.IsMovingCheckpoint = true
+    hostPlayer.EditCheckpointTemp = Checkpoints[hostPlayer.CheckpointCurrentIdx]
+    createEffect(hostPlayer, Effect.GOOD_AURA, Color.ROSE, hostPlayer.EditCheckpointTemp, RingSize-0.15, EffectReeval.VISIBILITY_POSITION_AND_RADIUS)
+    hostPlayer.EditCheckpointEffect = getLastCreatedEntity()
+	hostPlayer.EditorIsMovingCheckpoint = true
 
 
 rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to true so next melee button can be presssed":
-	@Event eachPlayer
-    @Condition hostPlayer.WsEditorOn
-    @Condition eventPlayer == hostPlayer
-	@Condition not eventPlayer.isHoldingButton(Button.MELEE)
+    @Condition EditorOn
+	@Condition not hostPlayer.isHoldingButton(Button.MELEE)
 
-	eventPlayer.EditMeleeButtonPressed = false
+	hostPlayer.EditMeleeButtonPressed = false
 
 
-macro cam_distance = 8
-# calcultes distance between cam and wall and subtracts 1 to make sure you are not inside the wall
-# if nothing is hit then it just returns max length
-# parameter is the start position
-macro cam_dist_calc(start):
-    distance(start, raycast(start, start + eventPlayer.getFacingDirection() * - cam_distance,null,null,false).getHitPosition()) - 1
 
 def StartEditorCamera():
     @Name "Editor | Start Editor 3rd Person Camera"
     
-    eventPlayer.setInvisibility(Invis.ALL)
+    hostPlayer.setInvisibility(Invis.ALL)
     DisableAbilities()
 
-    eventPlayer.startCamera(
-        eventPlayer.CurrentCheckpoint + updateEveryFrame(eventPlayer.getFacingDirection() * - cam_dist_calc(eventPlayer.CurrentCheckpoint) ),
-        eventPlayer.CurrentCheckpoint, 
-        500
+    hostPlayer.startCamera(
+        updateEveryFrame(
+        raycastHitPosition(hostPlayer.CheckpointCurrent,
+        hostPlayer.CheckpointCurrent - 8 * hostPlayer.getFacingDirection(),
+        null, null, false) + hostPlayer.getFacingDirection()),
+        hostPlayer.CheckpointCurrent, 500
     )
     
 
 def StartEditorCamera2():
     @Name "Editor | Start Editor 3rd Person Camera | Checkpoint Movement"
 
-    eventPlayer.startCamera(
-        eventPlayer.EditCheckpointTemp + (
-            updateEveryFrame(eventPlayer.getFacingDirection()) * -6
-        ), 
-        eventPlayer.EditCheckpointTemp, 
+    hostPlayer.startCamera(
+        hostPlayer.EditCheckpointTemp - 6 * updateEveryFrame(hostPlayer.getFacingDirection()), 
+        hostPlayer.EditCheckpointTemp, 
         25
     )
 
 def StopEditorCamera():
     @Name "Editor | Stop Editor 3rd Person Camera"
-    eventPlayer.stopCamera()
-    eventPlayer.setInvisibility(Invis.NONE)
+    hostPlayer.stopCamera()
+    hostPlayer.setInvisibility(Invis.NONE)
     EnableAbilities()
 
 
 def DisableAbilities():
     @Name "Editor | Disable Movement and Abilities"
-    eventPlayer.setJumpEnabled(false)
-    eventPlayer.setCrouchEnabled(false)
-    eventPlayer.setPrimaryFireEnabled(false)
-    eventPlayer.setSecondaryFireEnabled(false)
-    eventPlayer.disallowButton(Button.SECONDARY_FIRE)
-    eventPlayer.setAbility1Enabled(false)
-    eventPlayer.setAbility2Enabled(false)
-    eventPlayer.setMoveSpeed(0)
+    hostPlayer.setJumpEnabled(false)
+    hostPlayer.setCrouchEnabled(false)
+    hostPlayer.setPrimaryFireEnabled(false)
+    hostPlayer.setSecondaryFireEnabled(false)
+    hostPlayer.disallowButton(Button.SECONDARY_FIRE)
+    hostPlayer.setAbility1Enabled(false)
+    hostPlayer.setAbility2Enabled(false)
+    hostPlayer.setMoveSpeed(0)
 
 def EnableAbilities():
     @Name "Editor | Enable Movement and Abilities"
-    eventPlayer.setJumpEnabled(true)
-    eventPlayer.setCrouchEnabled(true)
-    eventPlayer.setPrimaryFireEnabled(true)
-    eventPlayer.setSecondaryFireEnabled(true)
-    eventPlayer.allowButton(Button.SECONDARY_FIRE)
-    eventPlayer.setAbility1Enabled(false) # This stays off always
-    eventPlayer.setAbility2Enabled(true)
-    eventPlayer.setMoveSpeed(100)
+    hostPlayer.setJumpEnabled(true)
+    hostPlayer.setCrouchEnabled(true)
+    hostPlayer.setPrimaryFireEnabled(true)
+    hostPlayer.setSecondaryFireEnabled(true)
+    hostPlayer.allowButton(Button.SECONDARY_FIRE)
+    hostPlayer.setAbility1Enabled(false) # This stays off always
+    hostPlayer.setAbility2Enabled(true)
+    hostPlayer.setMoveSpeed(100)

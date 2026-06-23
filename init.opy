@@ -13,16 +13,18 @@ rule "Init Global":
         createWorkshopSettingInt("Lobby Setting", "Restart Lobby After X minutes", 15, 1, 60, 0) - 1
     )
     wait(1)
+    setMatchTime(900)
     startForcingSpawn(Team.ALL, 0)
     startForcingSpawn(Team.ALL, 1)
     startForcingSpawn(Team.ALL, 2)
     stopForcingSpawn(Team.ALL)
 
-    LeaderboardText = null
-    LeaderboardEntries = []
-    LeaderboardRemake = null
-
-	setMatchTime(900)
+    EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
+    if not EditorOn:
+        #LeaderboardText = null
+        #LeaderboardRemake = null
+        LeaderboardEntries = []
+        #TagFG.setupTag() # Used for coloring Live Split
 
     wait(ELoadOrder.SETUP)
     
@@ -34,17 +36,14 @@ rule "Init Global":
 rule "Init Player":
     @Event playerJoined
     @Condition eventPlayer.isDummy() == false or eventPlayer in TestBotArray
-    eventPlayer.WsEditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
-    
 	eventPlayer.disableKillFeed()
     eventPlayer.disableGamemodeHud()
     eventPlayer.disableGamemodeInWorldUi()
     eventPlayer.disableMessages()
     eventPlayer.disablePlayerCollision()
-    eventPlayer.setAbility1Enabled(false)
-    eventPlayer.setStatusEffect(null, Status.INVINCIBLE, 999999)
 
     waitUntil(getTotalTimeElapsed() > ELoadOrder.PLAYER_INIT, ELoadOrder.PLAYER_INIT) # map variables need to load first
+    waitUntil(eventPlayer.hasSpawned())
     wait(0.128)
     FullReset()
 
@@ -59,7 +58,7 @@ rule "Server Time Elapsed":
 rule "After 3s if the checkpoints are empty then provide a warning":
     @Condition getTotalTimeElapsed() > ELoadOrder.MISSING_DATA
 	@Condition len(Checkpoints) == 0 
-	hudHeader(null if localPlayer == hostPlayer and hostPlayer.WsEditorOn else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
+	hudHeader(null if EditorOn and localPlayer == hostPlayer else localPlayer, " {0} Warning: Map has no data ".format(iconString(Icon.WARNING)), HudPosition.TOP, 5, Color.RED, HudReeval.VISIBILITY, SpecVisibility.DEFAULT)
 
 
 

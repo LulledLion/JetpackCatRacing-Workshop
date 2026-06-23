@@ -11,7 +11,7 @@ rule "go to last cp - cheat":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.ULTIMATE)
     wait(0.2, Wait.ABORT_WHEN_FALSE)
-    eventPlayer.CurrentCheckpointIdx = len(Checkpoints) - 2
+    eventPlayer.CheckpointCurrentIdx = len(Checkpoints) - 2
     SetCheckpoints()
     GoToResetPoint()
 
@@ -82,7 +82,7 @@ rule "bots: create test bots":
     @Condition bots_on
     TestBotArray = []
     while len(TestBotArray) < testbot_number:
-        createDummy(Hero.JETPACK_CAT, test_team, -1, null, null)
+        createDummy(Racer.Hero, test_team, -1, null, null)
         TestBotArray.append(getLastCreatedEntity())
         wait(0.1)
         TestBotArray[len(TestBotArray)-1].startForcingName("test bot {0}".format(len(TestBotArray)-1))
@@ -105,9 +105,9 @@ rule "bots: leaderboard test routine":
     delay_per_bot(leaderboard_delay)
 
     # set bot to last point, teleport them and force em down into it
-    eventPlayer.CurrentCheckpointIdx = len(Checkpoints) - 2
+    eventPlayer.CheckpointCurrentIdx = len(Checkpoints) - 2
     SetCheckpoints()
-    eventPlayer.teleport(eventPlayer.GoalCheckpoint + Vector.UP  + Vector.UP * RingSize)
+    eventPlayer.teleport(eventPlayer.CheckpointGoal + Vector.UP  + Vector.UP * RingSize)
     wait(1)
     eventPlayer.startForcingButton(Button.CROUCH)
     waitUntil(not eventPlayer.IsRacing, 5)

@@ -4,7 +4,7 @@
 
 settings {
     "main": {
-        "description": "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nWorkshop website: workshop.codes/TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing",
+        "description": f"Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nEditor Code: {Racer.ShareCode}\nDiscord: {Racer.Discord}\nWebsite: {Racer.Website}",
         "modeName": f"Jetpack Cat Racing {VERSION}"
     },
     "lobby": {
@@ -18,9 +18,10 @@ settings {
     },
     "gamemodes": {
         "skirmish": {
+            PRESET_SKIRMISH_MAPS
         },
 		"tdm": {
-            "enabledMaps": []
+            PRESET_TDM_MAPS
         },
         "general": {
             "gamemodeStartTrigger": "manual",
@@ -35,11 +36,19 @@ settings {
             "jetpackCat": {
                 "secondaryFireRechargeRate%": 500,
                 "enablePassiveUnlimitedFuel": true,
+                "movementSpeed%": 195,
+                "enableUlt": false,
+                "enableInfiniteAmmo": true
+            },
+            "shion": {
+                "secondaryFireCooldown%": 0,
+                "ability2Cooldown%": 0,
+                "ability2Duration%": 500,
                 "enableUlt": false,
                 "enableInfiniteAmmo": true
             },
             "enabledHeroes": [
-                "jetpackCat"
+                Racer.String
             ]
         }
     }

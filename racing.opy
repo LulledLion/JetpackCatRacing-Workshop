@@ -1,58 +1,62 @@
 #!mainFile "main.opy"
 
 def SetCheckpoints():
-    eventPlayer.CurrentCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx] 
-    eventPlayer.GoalCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 1]
-    eventPlayer.AfterNextCheckpoint = Checkpoints[eventPlayer.CurrentCheckpointIdx + 2]
-
-
-#$$ Combine into GoToResetPoint()
-def ResetSpeed(): 
-    eventPlayer.setMoveSpeed(100)
-    eventPlayer.SpeedMultiplier = 100
+    eventPlayer.CheckpointCurrent = Checkpoints[eventPlayer.CheckpointCurrentIdx].last()
+    eventPlayer.CheckpointGoal = Checkpoints[eventPlayer.CheckpointCurrentIdx + 1][0]
+    eventPlayer.CheckpointAfterNext = Checkpoints[eventPlayer.CheckpointCurrentIdx + 2][0]
 
 
 
 def GoToResetPoint(): # go to CurrentCheckpoint
-	# If there's no checkpoint set then ignore it
-	if eventPlayer.CurrentCheckpoint == null:
+    eventPlayer.ResetSpeed()
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, false)
+
+    # If there's no checkpoint set then ignore it
+	if eventPlayer.CheckpointCurrent == null:
 		eventPlayer.respawn()
 		return
-    
-    eventPlayer.teleport(eventPlayer.CurrentCheckpoint)
-    eventPlayer.startForcingPosition(eventPlayer.CurrentCheckpoint)
+
+    if not eventPlayer.EditorCurrentMode:
+        eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.CheckpointGoal), Relativity.TO_WORLD)
+
+    eventPlayer.teleport(eventPlayer.CheckpointCurrent)
+    eventPlayer.startForcingPosition(eventPlayer.CheckpointCurrent)
     wait()
-    if not eventPlayer.CurrentEditorMode:
-        eventPlayer.setFacing(directionTowards(eventPlayer.getEyePosition(),  eventPlayer.GoalCheckpoint), Relativity.TO_WORLD)
     eventPlayer.stopForcingPosition()
+    
 
 
 
 def FullReset():
-    #stopChasingVariable(eventPlayer.Timer)
-    eventPlayer.CurrentCheckpointIdx = 0
+    eventPlayer.CheckpointCurrentIdx = 0
+    eventPlayer.TimeStart = 0
+    eventPlayer.TimeStop = 0
+    eventPlayer.TimeSplitString = []
     SetCheckpoints()
-    #eventPlayer.Timer = 0
-    eventPlayer.StartTime = 0
-    eventPlayer.StopTime = 0
-    eventPlayer.IsRacing = false
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
-    ResetSpeed()
-
-    waitUntil(eventPlayer.isMoving() and eventPlayer.CurrentEditorMode == EEditorMode.OFF, Math.INFINITY)
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setMoveSpeed(0)
+        if eventPlayer.isUsingAbility2():
+            eventPlayer.cancelPrimaryAction()
+            wait(0.016 * 17)
+        wait(0.016 * 5)
+        #eventPlayer.forceButtonPress(Button.ABILITY_2)
+        waitUntil((eventPlayer.isUsingAbility1() or eventPlayer.isUsingAbility2()) and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
+        eventPlayer.setMoveSpeed(100)
+    elif Racer.Hero == Hero.JETPACKCAT:
+        waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
     eventPlayer.IsRacing = true
     if len(Checkpoints) <= 1:
         return
-    eventPlayer.StartTime = getTotalTimeElapsed()
-	#if len(Checkpoints) > 1:
-	#	chaseAtRate(eventPlayer.Timer, Math.INFINITY, 1)
-    
-	
-    
+    eventPlayer.TimeStart = getTotalTimeElapsed()
+
+
+
 rule "Save previous position":
     @Event playerJoined
-    eventPlayer.OldPosition = eventPlayer.CurrentPosition
-    eventPlayer.CurrentPosition = eventPlayer.getPosition()
+    eventPlayer.PositionOld = eventPlayer.PositionCurrent
+    eventPlayer.PositionCurrent = eventPlayer.getPosition()
     wait(0)
     loop()
 
@@ -60,65 +64,82 @@ rule "Save previous position":
 
 rule "Arrive at Checkpoint":
     @Event eachPlayer
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-	@Condition eventPlayer.GoalCheckpoint != null
-    #@Condition len(Checkpoints) > 1 # Must be true if GoalCheckpoint is not 0
-    @Condition eventPlayer.isAlive() and eventPlayer.IsRacing
-    @Condition distance(eventPlayer.GoalCheckpoint, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
+    @Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
+	@Condition eventPlayer.CheckpointGoal != null
+    @Condition eventPlayer.isAlive()
+    @Condition distance(eventPlayer.CheckpointGoal, updateEveryFrame(eventPlayer.getEyePosition())) <= RingSize #2.65
 
-    # TODO: Separate starting the level vs arriving at a checkpoint IN the level?
+    eventPlayer.ModifySpeed(1.5) #$$ TODO: Map adjustable actual speed percent
+    if Racer.Hero == Hero.SHION:
+        eventPlayer.setAbilityCooldown(Button.ABILITY_1, false)
+
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    eventPlayer.setMoveSpeed(eventPlayer.SpeedMultiplier * 2)
-    eventPlayer.SpeedMultiplier += 3
+    #$$ TODO Splits Logic Here
+    eventPlayer.TimeSplit = getTotalTimeElapsed()
+    eventPlayer.TimeSplit -= eventPlayer.TimeStart
+    eventPlayer.TimeSplits[eventPlayer.CheckpointCurrentIdx] = eventPlayer.TimeSplit
+    eventPlayer.TimeSplitString = "{0}{1}".format(eventPlayer.TimeSplitString,
+        "{0}:     {1}{2}{3}{1}     {4}\n".format(
+        eventPlayer.CheckpointCurrentIdx,
+        "", #TagFG,
+        #"A0FFA0FF"
+        [] if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "+", #"FF0040FF",
+        (eventPlayer.TimeSplit - eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx]) if eventPlayer.TimePersonalBest else 0.001,
+        eventPlayer.TimeSplit
+    ))
+    if eventPlayer.CheckpointCurrentIdx >= LiveSplitMaxLines:
+        eventPlayer.TimeSplitString = eventPlayer.TimeSplitString.substring(eventPlayer.TimeSplitString.strIndex('\n') + 1 )
+    #$$ END Splits Logic Here
 
-    eventPlayer.CurrentCheckpointIdx += 1
+    eventPlayer.CheckpointCurrentIdx += 1
     SetCheckpoints()
+    if len(Checkpoints[eventPlayer.CheckpointCurrentIdx]) == 2:
+        eventPlayer.teleport(eventPlayer.CheckpointCurrent)
 
+    if len(Checkpoints) <= 1 or eventPlayer.CheckpointCurrentIdx < len(Checkpoints) - 1:
+        return
 
-
-rule "Finish":
-    @Event eachPlayer
-    @Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
-    @Condition len(Checkpoints) > 1
-    @Condition eventPlayer.GoalCheckpoint == null
-    @Condition eventPlayer.CurrentCheckpointIdx == len(Checkpoints) - 1 
-    #@Condition eventPlayer.isAlive()
-    #stopChasingVariable(eventPlayer.Timer)
+    #Finished
     eventPlayer.IsRacing = false
-    eventPlayer.StopTime = getTotalTimeElapsed()
-    eventPlayer.StopTime -= eventPlayer.StartTime
-    eventPlayer.StopTime -= 0.016
-    eventPlayer.StopTime += (0.016
-        * max(0, min(1, line_segmentXsphere(eventPlayer.OldPosition, eventPlayer.CurrentPosition, Checkpoints.last(), RingSize)
-        / distance(eventPlayer.OldPosition, eventPlayer.CurrentPosition))))
-	if eventPlayer.WsEditorOn: # Don't record editor times
-		return
+    eventPlayer.TimeStop = getTotalTimeElapsed()
+    eventPlayer.TimeStop -= eventPlayer.TimeStart
+
+    if EditorOn: # Don't record editor times
+        return
+
+    # High precision adjustment
+    eventPlayer.TimeStop -= 0.016
+    eventPlayer.TimeStop += (0.016
+        * max(0, min(1, line_segmentXsphere(eventPlayer.PositionOld, eventPlayer.PositionCurrent, Checkpoints.last(), RingSize)
+        / distance(eventPlayer.PositionOld, eventPlayer.PositionCurrent))))
 
     if "{0}".format(eventPlayer) in LeaderboardEntries.map(lambda e: e[0]):
         # you already have a time
-        if eventPlayer.StopTime > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: 
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
+        if eventPlayer.TimeStop > LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}")[0][1]: 
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.TimeStop.numberString()))
             return # new time worse
-        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.StopTime.numberString()))
+        bigMessage(eventPlayer, "New personal best: {}".format(eventPlayer.TimeStop.numberString()))
         LeaderboardEntries.remove(LeaderboardEntries.filter(lambda e: e[0] == f"{eventPlayer}"))
     else: # you are not in list yet
-            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.StopTime.numberString()))
-        if len(LeaderboardEntries) < 25 or eventPlayer.StopTime < LeaderboardEntries[24][1]: # board has room for more or faster than last entry
+            bigMessage(eventPlayer, "Completion time: {}".format(eventPlayer.TimeStop.numberString()))
+        if len(LeaderboardEntries) < 25 or eventPlayer.TimeStop < LeaderboardEntries[24][1]: # board has room for more or faster than last entry
             del LeaderboardEntries[24]
         else:
             return # your time lower than last entry
 
-    eventPlayer.PersonalBest = eventPlayer.StopTime.numberString()
+    eventPlayer.TimePersonalBest = eventPlayer.TimeStop.numberString()
+    eventPlayer.TimeSplitsPB = eventPlayer.TimeSplits
+
     # new top 5 if faster or entry doesnt exist yet    
-    if (LeaderboardEntries[0][1] > eventPlayer.StopTime or not LeaderboardEntries[0] or
-        LeaderboardEntries[1][1] > eventPlayer.StopTime or not LeaderboardEntries[1] or
-        LeaderboardEntries[2][1] > eventPlayer.StopTime or not LeaderboardEntries[2] or
-        LeaderboardEntries[3][1] > eventPlayer.StopTime or not LeaderboardEntries[3] or
-        LeaderboardEntries[4][1] > eventPlayer.StopTime or not LeaderboardEntries[4]):
-        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.StopTime.numberString(), eventPlayer))
+    if (LeaderboardEntries[0][1] > eventPlayer.TimeStop or not LeaderboardEntries[0] or
+        LeaderboardEntries[1][1] > eventPlayer.TimeStop or not LeaderboardEntries[1] or
+        LeaderboardEntries[2][1] > eventPlayer.TimeStop or not LeaderboardEntries[2] or
+        LeaderboardEntries[3][1] > eventPlayer.TimeStop or not LeaderboardEntries[3] or
+        LeaderboardEntries[4][1] > eventPlayer.TimeStop or not LeaderboardEntries[4]):
+        bigMessage(getAllPlayers(), "New top 5 time: {} by {}!".format(eventPlayer.TimeStop.numberString(), eventPlayer))
     
-    LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.StopTime]] )
+    LeaderboardEntries.append( [["{0}".format(eventPlayer), eventPlayer.TimeStop]] )
     LeaderboardRemake = true
 
 
@@ -126,15 +147,14 @@ rule "Finish":
 rule "Reset - Single Checkpoint":
     @Event eachPlayer
 	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
 
     waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
     if eventPlayer.isHoldingButton(Button.RELOAD):
         return
-    if eventPlayer.CurrentCheckpointIdx:
+    if eventPlayer.CheckpointCurrentIdx:
         GoToResetPoint()
-        ResetSpeed()
     else:
         FullReset()
 
@@ -143,7 +163,7 @@ rule "Reset - Single Checkpoint":
 rule "Reset - Full":
     @Event eachPlayer
 	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.CurrentEditorMode == EEditorMode.OFF
+	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
     @Condition eventPlayer.isHoldingButton(Button.RELOAD)
 
     wait(0.5, Wait.ABORT_WHEN_FALSE)
@@ -155,12 +175,11 @@ rule "Handle Death":
     @Event playerDied
     eventPlayer.respawn()
     GoToResetPoint()
-    ResetSpeed()
 
 
 
 rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
-	@Condition not hostPlayer.WsEditorOn
+	@Condition not EditorOn
 	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
     bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
     wait(60)

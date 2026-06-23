@@ -1,4 +1,5 @@
 #!mainFile "main.opy"
+PRESET_MAP_DATA
 
 rule "Map 1 Data <--- Insert Map Data Here":
     # Paste your map data here and change the condition to the correct map.
