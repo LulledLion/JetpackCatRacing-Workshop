@@ -35,6 +35,8 @@ def FullReset():
     eventPlayer.TimeSplitString = []
     SetCheckpoints()
     GoToResetPoint() # CurrentCheckpoint is first reset so this works
+    if len(Checkpoints) <= 1:
+        return
     if Racer.Hero == Hero.SHION:
         eventPlayer.setMoveSpeed(0)
         if eventPlayer.isUsingAbility2():
@@ -47,8 +49,6 @@ def FullReset():
     elif Racer.Hero == Hero.JETPACKCAT:
         waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
     eventPlayer.IsRacing = true
-    if len(Checkpoints) <= 1:
-        return
     eventPlayer.TimeStart = getTotalTimeElapsed()
 
 
