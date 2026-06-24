@@ -64,14 +64,12 @@ subroutine DisableAbilities
 subroutine EnableAbilities
 subroutine SetCheckpoints
 
-# testscripts disable: ##, enable: #
-#!define test_script ##
-
-#!define divider(x) rule "------------------------------------------------------------------------  x ------------------------------------------------------------------------ ":\
-    @Delimiter\
-    @Disabled
-
-#!define LeftAlign100 "                                                                                                    "
+enum EWorkshopSettings:
+    LobbyCategory = "Lobby Setting",
+        LobbyInfiniteTime = "Infinite Lobby Time",
+        LobbyRestart = "Restart Lobby After X minutes",
+    EditorCategory = "Editor"
+        EditorEnabled = "Editor Mode Enabled"
 
 enum ECustomize: # index in the customize array for colors and such
     CREDIT_NAME,
@@ -138,6 +136,15 @@ enum EEditorMode:
     MOVE = 2,
     INSERT = 3,
     REMOVE = 4,
+
+# testscripts disable: ##, enable: #
+#!define test_script ##
+
+#!define divider(x) rule "------------------------------------------------------------------------  x ------------------------------------------------------------------------ ":\
+    @Delimiter\
+    @Disabled
+
+#!define LeftAlign100 "                                                                                                    "
 
 macro Float.numberString(precision = 4, truncate = 2):
     # Precision: Min 3 Max 7

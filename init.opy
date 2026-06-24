@@ -9,8 +9,8 @@ rule "Init Global":
     disableGamemodeCompletion()
     disableScoring()
     RestartLobbyTime = (
-        createWorkshopSettingBool("Lobby Setting", "Infinite Lobby Time", false, 1) * Math.INFINITY +
-        createWorkshopSettingInt("Lobby Setting", "Restart Lobby After X minutes", 15, 1, 60, 0) - 1
+        createWorkshopSettingBool(EWorkshopSettings.LobbyCategory, EWorkshopSettings.LobbyInfiniteTime, false, 1) * Math.INFINITY +
+        createWorkshopSettingInt(EWorkshopSettings.LobbyCategory, EWorkshopSettings.LobbyRestart, 15, 1, 60, 0) - 1
     )
     wait(1)
     setMatchTime(900)
@@ -19,7 +19,7 @@ rule "Init Global":
     startForcingSpawn(Team.ALL, 2)
     stopForcingSpawn(Team.ALL)
 
-    EditorOn = createWorkshopSettingBool("Editor", "Editor Mode Enabled", EDITOR_ON, 0)
+    EditorOn = createWorkshopSettingBool(EWorkshopSettings.EditorCategory, EWorkshopSettings.EditorEnabled, EDITOR_ON, 0)
     if not EditorOn:
         #LeaderboardText = null
         #LeaderboardRemake = null
