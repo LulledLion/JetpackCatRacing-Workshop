@@ -283,6 +283,9 @@ def EnableAbilities():
     hostPlayer.setPrimaryFireEnabled(true)
     hostPlayer.setSecondaryFireEnabled(true)
     hostPlayer.allowButton(Button.SECONDARY_FIRE)
-    hostPlayer.setAbility1Enabled(false) # This stays off always
+    if Racer.Hero == Hero.JETPACK_CAT:
+        hostPlayer.setAbility1Enabled(false) # This stays off always
+    else:
+        hostPlayer.setAbility1Enabled(true)
     hostPlayer.setAbility2Enabled(true)
     hostPlayer.setMoveSpeed(100)
