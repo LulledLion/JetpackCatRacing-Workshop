@@ -8,7 +8,7 @@
 #!suppressWarnings w_dark_color
 
 # settings ###################
-macro VERSION = "1.1.1"
+macro VERSION = "1.2.0"
 macro INSPECTOR_ON = false
 
 # preset #################
