@@ -78,17 +78,15 @@ rule "Arrive at Checkpoint":
     eventPlayer.TimeSplit = getTotalTimeElapsed()
     eventPlayer.TimeSplit -= eventPlayer.TimeStart
     eventPlayer.TimeSplits[eventPlayer.CheckpointCurrentIdx] = eventPlayer.TimeSplit
-    eventPlayer.TimeSplitString = "{0}{1}".format(eventPlayer.TimeSplitString,
-        "{0}:     {1}{2}{3}{1}     {4}\n".format(
+    eventPlayer.TimeSplitString = "{0}\n{1}: {2}fg{3}{4} {5}{2}/fg>".format(eventPlayer.TimeSplitString,
         eventPlayer.CheckpointCurrentIdx,
-        "", #TagFG,
-        #"A0FFA0FF"
-        [] if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "+", #"FF0040FF",
+        TagFG,
+        "A0FFA0FF>" if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "FF0040FF>+",
         (eventPlayer.TimeSplit - eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx]) if eventPlayer.TimePersonalBest else 0.001,
         eventPlayer.TimeSplit
-    ))
+    )
     if eventPlayer.CheckpointCurrentIdx >= LiveSplitMaxLines:
-        eventPlayer.TimeSplitString = eventPlayer.TimeSplitString.substring(eventPlayer.TimeSplitString.strIndex('\n') + 1 )
+        eventPlayer.TimeSplitString = eventPlayer.TimeSplitString.substring(eventPlayer.TimeSplitString.strIndex('>\n') + (1))
     #$$ END Splits Logic Here
 
     eventPlayer.CheckpointCurrentIdx += 1

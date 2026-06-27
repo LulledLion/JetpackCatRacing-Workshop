@@ -24,7 +24,7 @@ globalvar LeaderboardRemake 62 # trigger remake leaderboard
 # Plugins
 globalvar MapVectorArray 127 # Little Destructo | Fence breaker
 globalvar TestBotArray 126
-#globalvar TagFG 125
+globalvar TagFG 125
 
 # Player variables
 playervar EditorExport

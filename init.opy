@@ -24,7 +24,7 @@ rule "Init Global":
         #LeaderboardText = null
         #LeaderboardRemake = null
         LeaderboardEntries = []
-        #TagFG.setupTag() # Used for coloring Live Split
+        TagFG.setupTag() # Used for coloring Live Split
 
     wait(ELoadOrder.SETUP)
     

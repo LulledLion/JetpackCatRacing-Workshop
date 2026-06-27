@@ -19,17 +19,18 @@ rule "HUD Setup":
 
     hudSubtext(localPlayer, "\n{0} Speed: {1}\n{2} Multiplier: {3}%{4}".format(abilityIconString(Racer.Hero, Button.SECONDARY_FIRE), localPlayer.getSpeed(), iconString(Icon.BOLT), localPlayer.getSpeedPercent, LeftAlign100), HudPosition.LEFT, EHudOrder.SPD, ColorConfig[ECustomize.SPD_COLOR], HudReeval.VISIBILITY_AND_STRING)
     
-    hudSubheader(localPlayer, "\n{0} Personal best: {1}\nLvl      PB       Split\n{2}{3}{4}".format(
+    hudText(localPlayer, null,
+        "\n{0} Personal best: {1}\nLvl   PB   Split{2}{3}".format(
         abilityIconString(Racer.Hero, Button.ABILITY_2),
         localPlayer.TimePersonalBest if localPlayer.TimePersonalBest else " —",
         localPlayer.TimeSplitString,
-        [] if localPlayer.TimeStop else "{0}:     {1}{2}{3}{1}     {4}".format(
+            [] if localPlayer.TimeStop else "\n{0}: {1}fg{2}{3}{1}/fg>".format( # " {4}"
             localPlayer.CheckpointCurrentIdx,
-            "", #TagFG,
-            #"A0FFA0FF"
-            [] if ServerTimeElapsed - localPlayer.TimeStart - localPlayer.TimeSplitsPB[localPlayer.CheckpointCurrentIdx] <= 0 else "+", #"FF0040FF",
+                TagFG,
+                "A0FFA0FF>" if ServerTimeElapsed - localPlayer.TimeStart - localPlayer.TimeSplitsPB[localPlayer.CheckpointCurrentIdx] <= 0 else "FF0040FF>+",
             localPlayer.LiveDelta if localPlayer.TimePersonalBest else 0.001,
             localPlayer.LiveTime
+            )
         ),
         LeftAlign100
     ), HudPosition.LEFT, sortOrder = EHudOrder.LIVE_SPLIT, reevaluation = HudReeval.VISIBILITY_AND_STRING)
