@@ -37,9 +37,7 @@ rule "HUD Setup":
     # Center
     hudText(
         localPlayer if not hostPlayer.EditorShowingExportInstructions else null, 
-        iconString(Icon.ARROW_RIGHT) if localPlayer.IsRacing else iconString(Icon.FLAG) if localPlayer.CheckpointCurrentIdx == 0 else  iconString(Icon.CHECKMARK) , 
-        "{} / {}".format(localPlayer.CheckpointCurrentIdx, len(Checkpoints)-1), 
-        "Time: {}".format(localPlayer.CurrentTime), 
+        null, #iconString(Icon.ARROW_RIGHT) if localPlayer.TimeStart and not localPlayer.TimeStop else iconString(Icon.FLAG) if localPlayer.CheckpointCurrentIdx == 0 else iconString(Icon.CHECKMARK),
         HudPosition.TOP, 
 		EHudOrder.TIMER,
         ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], 

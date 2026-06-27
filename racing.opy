@@ -48,7 +48,6 @@ def FullReset():
         eventPlayer.setMoveSpeed(100)
     elif Racer.Hero == Hero.JETPACKCAT:
         waitUntil(eventPlayer.isMoving() and eventPlayer.EditorCurrentMode == EEditorMode.OFF, Math.INFINITY)
-    eventPlayer.IsRacing = true
     eventPlayer.TimeStart = getTotalTimeElapsed()
 
 
@@ -101,7 +100,6 @@ rule "Arrive at Checkpoint":
         return
 
     #Finished
-    eventPlayer.IsRacing = false
     eventPlayer.TimeStop = getTotalTimeElapsed()
     eventPlayer.TimeStop -= eventPlayer.TimeStart
 

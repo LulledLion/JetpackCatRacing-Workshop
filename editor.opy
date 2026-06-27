@@ -41,8 +41,6 @@ rule "Editor | Enable Checkpoint Selection":
 		destroyEffect(hostPlayer.EditCheckpointEffect)
         StopEditorCamera()
 		hostPlayer.EditorIsMovingCheckpoint = false
-        #if hostPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:
-        #    hostPlayer.IsRacing = true
 		hostPlayer.teleport(Checkpoints[hostPlayer.CheckpointCurrentIdx])
 		wait(0.1)
 		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)

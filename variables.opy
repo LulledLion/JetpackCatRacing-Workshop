@@ -51,7 +51,6 @@ playervar TimeSplitString
 playervar PositionOld
 playervar PositionCurrent
 
-playervar IsRacing
 playervar Speed
 
 # Subroutines

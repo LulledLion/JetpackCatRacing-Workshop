@@ -110,7 +110,7 @@ rule "bots: leaderboard test routine":
     eventPlayer.teleport(eventPlayer.CheckpointGoal + Vector.UP  + Vector.UP * RingSize)
     wait(1)
     eventPlayer.startForcingButton(Button.CROUCH)
-    waitUntil(not eventPlayer.IsRacing, 5)
+    waitUntil(not localPlayer.TimeStart or localPlayer.TimeStop, 5)
     eventPlayer.stopForcingButton(Button.CROUCH)
 
 
