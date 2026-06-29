@@ -47,6 +47,13 @@ settings {
                 "enableUlt": false,
                 "enableInfiniteAmmo": true
             },
+            "wreckingBall": {
+                "ability2Cooldown%": 0,
+                "secondaryFireCooldown%": 0,
+                "ability3Cooldown%": 0,
+                "enableRollOnly": true,
+                "enableUlt": false
+            },
             "enabledHeroes": [
                 Racer.String
             ]

@@ -1,5 +1,5 @@
 #!optimizeForSize
-##!writeToOutputFile
+#!writeToOutputFile
 
 # warnings ###################
 #!suppressWarnings w_tags
@@ -15,7 +15,7 @@ macro INSPECTOR_ON = false
 #!define presets(preset) __script__("presets/presets.js")
 #!define racers(Hero) __script__('presets/racer.js')
 presets(0) # 0 Editor
-racers(["jetpackCat", "shion"][0])
+racers(["jetpackCat", "shion", "wreckingBall"][0])
 
 # javascript #################
 #!define JS(content) __script__("js.js")
