@@ -56,7 +56,7 @@ rule "Editor | Export Data":
 	
     wait(0.5, Wait.ABORT_WHEN_FALSE)
     hostPlayer.EditorShowingExportInstructions = true
-    hostPlayer.EditorExport = [ColorConfig, CreatorName, MapCode]
+    hostPlayer.EditorExport = [ColorConfig, CreatorName, MapCode, TagFG]
     EditorOn = null
     ColorConfig = null
 	CreatorName = null
@@ -68,7 +68,8 @@ rule "Editor | Export Data":
     EditorOn = true
     ColorConfig = hostPlayer.EditorExport[0]
     CreatorName = hostPlayer.EditorExport[1]
-	MapCode = hostPlayer.EditorExport.last()
+	MapCode = hostPlayer.EditorExport[2]
+    TagFG = hostPlayer.EditorExport.last()
     smallMessage(hostPlayer, "   Map Data Exported - Open Inspector")
 	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.EditorCurrentMode == EEditorMode.OFF else Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
