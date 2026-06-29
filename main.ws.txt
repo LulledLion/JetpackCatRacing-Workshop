@@ -3,7 +3,7 @@ settings
 	main
 	{
 		Description: "Jetpack Cat Racing framework.\n\nMaintained by DragonEngineer & LulledLion.\nAdapted by nebula\nOriginal credit to Jashaal & Roeesun.\n\nEditor Code: TSB2M\nDiscord: dsc.gg/jetpack\nWebsite: jetpackcat.racing"
-		Mode Name: "Jetpack Cat Racing 1.1.1"
+		Mode Name: "Jetpack Cat Racing 1.2.0"
 	}
 	lobby
 	{
@@ -52,6 +52,14 @@ settings
 				Ultimate Ability Satsuriku Spree: Off
 				No Ammunition Requirement: On
 			}
+			Wrecking Ball
+			{
+				Adaptive Shield Cooldown Time: 0%
+				Grappling Claw Cooldown Time: 0%
+				Piledriver Cooldown Time: 0%
+				Roll Always Active: On
+				Ultimate Ability Minefield: Off
+			}
 			enabled heroes
 			{
 				Jetpack Cat
@@ -78,6 +86,7 @@ variables {
         60: LeaderboardText
         61: LeaderboardEntries
         62: LeaderboardRemake
+        125: TagFG
         126: TestBotArray
         127: MapVectorArray
     player:
@@ -102,8 +111,7 @@ variables {
         18: TimeSplitString
         19: PositionOld
         20: PositionCurrent
-        21: IsRacing
-        22: Speed
+        21: Speed
 }
 
 subroutines {
@@ -290,6 +298,8 @@ rule ("Init Global") {
         If(Not(Global.EditorOn));
             "LeaderboardText = null\nLeaderboardRemake = null"
             Set Global Variable(LeaderboardEntries, Empty Array);
+            Set Global Variable(TagFG, Custom String("​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"));
+            Set Global Variable(TagFG, String Replace(Custom String("​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{0}〼", Global.TagFG), String Replace(Custom String("​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{0}〼", Global.TagFG), Empty Array, Empty Array), String Slice(String Replace(Custom String("​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​­{0}ࡀ", Global.TagFG), Empty Array, Empty Array), 171, True)));
         End;
         Wait(0.512, Ignore Condition);
         If(Compare(Global.Checkpoints, ==, Null));
@@ -388,9 +398,9 @@ rule ("HUD Setup") {
         Create HUD Text(Local Player, Hero Icon String(Hero(Jetpack Cat)), Custom String("Made By: {0}                                                                                                    ", Global.CreatorName), Custom String("Map Code: {0}                                                                                                    ", Global.MapCode), Left, 9, Color(Sky Blue), First Of(Global.ColorConfig), Value In Array(Global.ColorConfig, True), Visible To, Default Visibility);
         Create HUD Text(Local Player, Null, Custom String("Discord: dsc.gg/jetpack                                                                                                    "), Null, Left, 10, Null, Value In Array(Global.ColorConfig, 2), Null, Visible To, Default Visibility);
         Create HUD Text(Local Player, Null, Null, Custom String("\n{0} Speed: {1}\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Secondary Fire)), Speed Of(Local Player), Custom String("{0} Multiplier: {1}%                                                                                                    ", Icon String(Bolt), Round To Integer((Local Player).Speed, To Nearest))), Left, 11, Null, Null, Value In Array(Global.ColorConfig, 8), Visible To and String, Default Visibility);
-        Create HUD Text(Local Player, Null, Custom String("\n{0} Personal best: {1}\nLvl      PB       Split\n{2}", Ability Icon String(Hero(Jetpack Cat), Button(Ability 2)), If-Then-Else((Local Player).TimePersonalBest, (Local Player).TimePersonalBest, Custom String(" —")), Custom String("{0}{1}                                                                                                    ", (Local Player).TimeSplitString, If-Then-Else((Local Player).TimeStop, Empty Array, Custom String("{0}:     {1}{2}", (Local Player).CheckpointCurrentIdx, If-Then-Else(Compare(Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), <=, Null), Empty Array, Custom String("+")), Custom String("{0}     {1}", If-Then-Else((Local Player).TimePersonalBest, If-Then-Else((Local Player).TimeStart, Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), 0.001), 0.001), If-Then-Else((Local Player).TimeStart, Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), 0.001)))))), Null, Left, 12, Null, Color(White), Null, Visible To and String, Default Visibility);
+        Create HUD Text(Local Player, Null, Custom String("\n{0} Personal best: {1}\nLvl   PB   Split{2}", Ability Icon String(Hero(Jetpack Cat), Button(Ability 2)), If-Then-Else((Local Player).TimePersonalBest, (Local Player).TimePersonalBest, Custom String(" —")), Custom String("{0}{1}", (Local Player).TimeSplitString, If-Then-Else((Local Player).TimeStop, Empty Array, Custom String("\n{0}: {1}fg{2}", (Local Player).CheckpointCurrentIdx, Global.TagFG, Custom String("{0}{1}{2}/fg>", If-Then-Else(Compare(Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), <=, Null), Custom String("A0FFA0FF>"), Custom String("FF0040FF>+")), If-Then-Else((Local Player).TimePersonalBest, If-Then-Else((Local Player).TimeStart, Subtract(Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Value In Array((Local Player).TimeSplitsPB, (Local Player).CheckpointCurrentIdx)), 0.001), 0.001), Global.TagFG))))), Custom String("Time: {0}                                                                                                    ", If-Then-Else((Local Player).TimeStop, Custom String("{0}.{1}", Round To Integer((Local Player).TimeStop, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(True, (Local Player).TimeStop), Round To Integer((Local Player).TimeStop, Down)), 10000), Up)), 1, 4)), If-Then-Else((Local Player).TimeStart, Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Null))), Left, 12, Null, Color(White), Color(White), Visible To and String, Default Visibility);
         "Center"
-        Create HUD Text(If-Then-Else((Host Player).EditorShowingExportInstructions, Null, Local Player), If-Then-Else((Local Player).IsRacing, Icon String(Arrow: Right), If-Then-Else(Compare((Local Player).CheckpointCurrentIdx, ==, Null), Icon String(Flag), Icon String(Checkmark))), Custom String("{0} / {1}", (Local Player).CheckpointCurrentIdx, Subtract(Count Of(Global.Checkpoints), True)), Custom String("Time: {0}", If-Then-Else((Local Player).TimeStop, Custom String("{0}.{1}", Round To Integer((Local Player).TimeStop, Down), String Slice(First Of(Round To Integer(Multiply(Subtract(Add(True, (Local Player).TimeStop), Round To Integer((Local Player).TimeStop, Down)), 10000), Up)), 1, 4)), If-Then-Else((Local Player).TimeStart, Subtract(Global.ServerTimeElapsed, (Local Player).TimeStart), Null))), Top, False, Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
+        Create HUD Text(If-Then-Else((Host Player).EditorShowingExportInstructions, Null, Local Player), Null, Null, Custom String("{0} {1} / {2}", If-Then-Else((Local Player).CheckpointCurrentIdx, If-Then-Else(And((Local Player).TimeStart, Not((Local Player).TimeStop)), Icon String(Arrow: Right), Icon String(Checkmark)), Icon String(Flag)), (Local Player).CheckpointCurrentIdx, Subtract(Count Of(Global.Checkpoints), True)), Top, False, Null, Null, Value In Array(Global.ColorConfig, 4), Visible To and String, Default Visibility);
         "Right"
         Create HUD Text(If-Then-Else(Compare((Local Player).EditorCurrentMode, ==, Null), True, Null), Null, Null, Custom String("Press [{0}]: Quick reset\nHold [{0}]: Full restart\n", Input Binding String(Button(Reload))), Right, 16, Null, Null, Value In Array(Global.ColorConfig, 3), Visible To and String, Default Visibility);
     }
@@ -522,9 +532,8 @@ rule ("Subroutine FullReset") {
         Call Subroutine(SetCheckpoints);
         "CurrentCheckpoint is first reset so this works"
         Call Subroutine(GoToResetPoint);
-        Wait Until(And(Is Moving(Event Player), Compare((Event Player).EditorCurrentMode, ==, Null)), 999999999999);
-        Set Player Variable(Event Player, IsRacing, True);
         Abort If(Compare(Count Of(Global.Checkpoints), <=, 1));
+        Wait Until(And(Is Moving(Event Player), Compare((Event Player).EditorCurrentMode, ==, Null)), 999999999999);
         Set Player Variable(Event Player, TimeStart, Total Time Elapsed);
     }
 }
@@ -566,9 +575,9 @@ rule ("Arrive at Checkpoint") {
         Set Player Variable(Event Player, TimeSplit, Total Time Elapsed);
         Modify Player Variable(Event Player, TimeSplit, Subtract, (Event Player).TimeStart);
         Set Player Variable At Index(Event Player, TimeSplits, (Event Player).CheckpointCurrentIdx, (Event Player).TimeSplit);
-        Set Player Variable(Event Player, TimeSplitString, Custom String("{0}{1}:     {2}", (Event Player).TimeSplitString, (Event Player).CheckpointCurrentIdx, Custom String("{0}{1}     {2}\n", If-Then-Else(Compare(Value In Array((Event Player).TimeSplitsPB, (Event Player).CheckpointCurrentIdx), >, (Event Player).TimeSplit), Empty Array, Custom String("+")), If-Then-Else((Event Player).TimePersonalBest, Subtract((Event Player).TimeSplit, Value In Array((Event Player).TimeSplitsPB, (Event Player).CheckpointCurrentIdx)), 0.001), (Event Player).TimeSplit)));
+        Set Player Variable(Event Player, TimeSplitString, Custom String("{0}\n{1}: {2}", (Event Player).TimeSplitString, (Event Player).CheckpointCurrentIdx, Custom String("{0}fg{1}{2}", Global.TagFG, If-Then-Else(Compare(Value In Array((Event Player).TimeSplitsPB, (Event Player).CheckpointCurrentIdx), >, (Event Player).TimeSplit), Custom String("A0FFA0FF>"), Custom String("FF0040FF>+")), Custom String("{0} {1}{2}/fg>", If-Then-Else((Event Player).TimePersonalBest, Subtract((Event Player).TimeSplit, Value In Array((Event Player).TimeSplitsPB, (Event Player).CheckpointCurrentIdx)), 0.001), (Event Player).TimeSplit, Global.TagFG))));
         If(Compare((Event Player).CheckpointCurrentIdx, >=, 10));
-            Set Player Variable(Event Player, TimeSplitString, String Slice((Event Player).TimeSplitString, Add(Index Of String Char((Event Player).TimeSplitString, Custom String("\n")), True), 999999999999));
+            Set Player Variable(Event Player, TimeSplitString, String Slice((Event Player).TimeSplitString, Add(Index Of String Char((Event Player).TimeSplitString, Custom String(">\n")), True), 999999999999));
         End;
         "$$ END Splits Logic Here"
         Modify Player Variable(Event Player, CheckpointCurrentIdx, Add, True);
@@ -578,7 +587,6 @@ rule ("Arrive at Checkpoint") {
         End;
         Abort If(Or(Compare(Count Of(Global.Checkpoints), <=, 1), Compare((Event Player).CheckpointCurrentIdx, <, Subtract(Count Of(Global.Checkpoints), True))));
         "Finished"
-        Set Player Variable(Event Player, IsRacing, False);
         Set Player Variable(Event Player, TimeStop, Total Time Elapsed);
         Modify Player Variable(Event Player, TimeStop, Subtract, (Event Player).TimeStart);
         "Don't record editor times"
@@ -752,7 +760,6 @@ rule ("Editor | Enable Checkpoint Selection") {
             Destroy Effect((Host Player).EditCheckpointEffect);
             Call Subroutine(StopEditorCamera);
             Set Player Variable(Host Player, EditorIsMovingCheckpoint, False);
-            "if hostPlayer.CurrentCheckpointIdx < len(Checkpoints) - 1:\nhostPlayer.IsRacing = true"
             Teleport(Host Player, Value In Array(Global.Checkpoints, (Host Player).CheckpointCurrentIdx));
             Wait(0.1, Ignore Condition);
             Play Effect(Host Player, Ring Explosion Sound, Color(White), Position Of(Host Player), 100);
