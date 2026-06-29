@@ -52,6 +52,7 @@ playervar PositionOld
 playervar PositionCurrent
 
 playervar Speed
+#playervar NitroFuel
 
 # Subroutines
 subroutine FullReset
@@ -98,7 +99,7 @@ enum ELoadOrder:
 # _END are general purpose last order huds for their side
 enum EHudOrder: # hud ordering
     # hud middle ###############
-    TIMER,
+    LEVEL,
 	EDITOR_MODE_TEXT,
 	NEXT_CP_TEXT,
 	NEXT_PREV_MODE_TEXT,
@@ -164,6 +165,9 @@ macro Player.ModifySpeed(modifier):
     self.SetSpeed(self.Speed)
 macro Player.ResetSpeed():
     eventPlayer.SetSpeed(BASE_SPEED)
+
+macro NitroColor(percent):
+	rgb(510 - 5.1 * percent, 2.55 * percent - 64, 5.1 * percent - 128)
 
 macro Player.CurrentTime = self.TimeStop.numberString() if self.TimeStop else ( ServerTimeElapsed - self.TimeStart if self.TimeStart else 0 )
 macro LiveSplitMaxLines = 10

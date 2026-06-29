@@ -46,10 +46,11 @@ rule "HUD Setup":
             localPlayer.CheckpointCurrentIdx,
             len(Checkpoints) - 1),
         HudPosition.TOP,
-		EHudOrder.TIMER,
+		EHudOrder.LEVEL,
         ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME], ColorConfig[ECustomize.PLAYER_TIME],
         HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT
     )
+    /* progressBarHud(localPlayer, localPlayer.NitroFuel, "Nitro", HudPosition.TOP1, 0, NitroColor(localPlayer.NitroFuel), reevaluation = ProgressHudReeval.VISIBILITY_VALUES_AND_COLOR) */
 
     # Right
     hudSubtext(true if localPlayer.EditorCurrentMode == EEditorMode.OFF else null,
