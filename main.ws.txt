@@ -593,7 +593,7 @@ rule ("Arrive at Checkpoint") {
         Abort If(Global.EditorOn);
         "High precision adjustment"
         Modify Player Variable(Event Player, TimeStop, Subtract, 0.016);
-        Modify Player Variable(Event Player, TimeStop, Add, Multiply(0.016, Max(False, Min(True, Divide(Mapped Array(Array(Multiply(2.0, Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Direction Towards((Event Player).PositionOld, (Event Player).PositionCurrent)))), Multiply(-0.5, Add(Current Array Element, Square Root(Subtract(Multiply(Current Array Element, Current Array Element), Multiply(4.0, Subtract(Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld)), Multiply(Global.RingSize, Global.RingSize)))))))), Distance Between((Event Player).PositionOld, (Event Player).PositionCurrent))))));
+        Modify Player Variable(Event Player, TimeStop, Add, Multiply(0.016, Max(False, Min(True, Divide(Mapped Array(Array(Multiply(2, Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Direction Towards((Event Player).PositionOld, (Event Player).PositionCurrent)))), Multiply(-0.5, Add(Current Array Element, Square Root(Subtract(Multiply(Current Array Element, Current Array Element), Multiply(4, Subtract(Dot Product(Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld), Vector Towards(Last Of(Global.Checkpoints), (Event Player).PositionOld)), Multiply(Global.RingSize, Global.RingSize)))))))), Distance Between((Event Player).PositionOld, (Event Player).PositionCurrent))))));
         If(Array Contains(Mapped Array(Global.LeaderboardEntries, First Of(Current Array Element)), Custom String("{0}", Event Player)));
             "you already have a time"
             If(Compare((Event Player).TimeStop, >, Value In Array(First Of(Filtered Array(Global.LeaderboardEntries, Compare(First Of(Current Array Element), ==, Custom String("{0}", Event Player)))), True)));
@@ -780,7 +780,7 @@ rule ("Editor | Export Data") {
     actions {
         Wait(0.5, Abort When False);
         Set Player Variable(Host Player, EditorShowingExportInstructions, True);
-        Set Player Variable(Host Player, EditorExport, Array(Global.ColorConfig, Global.CreatorName, Global.MapCode));
+        Set Player Variable(Host Player, EditorExport, Array(Global.ColorConfig, Global.CreatorName, Global.MapCode, Global.TagFG));
         Set Global Variable(EditorOn, Null);
         Set Global Variable(ColorConfig, Null);
         Set Global Variable(CreatorName, Null);
@@ -792,7 +792,8 @@ rule ("Editor | Export Data") {
         Set Global Variable(EditorOn, True);
         Set Global Variable(ColorConfig, First Of((Host Player).EditorExport));
         Set Global Variable(CreatorName, Value In Array((Host Player).EditorExport, True));
-        Set Global Variable(MapCode, Last Of((Host Player).EditorExport));
+        Set Global Variable(MapCode, Value In Array((Host Player).EditorExport, 2));
+        Set Global Variable(TagFG, Last Of((Host Player).EditorExport));
         Small Message(Host Player, Custom String("   Map Data Exported - Open Inspector"));
         Play Effect(Host Player, Buff Impact Sound, Color(White), If-Then-Else(Compare((Host Player).EditorCurrentMode, ==, Null), Position Of(Host Player), Value In Array(Global.Checkpoints, (Host Player).CheckpointCurrentIdx)), 100);
     }

@@ -182,7 +182,7 @@ macro line_segmentXsphere(v1, v2, c0, r):
     # Line-Segment: vect v1 is outside sphere, vect v2 is inside sphere
     # Sphere: vect c0 is center, num r is radius
     # Intersect_Position = v1 + directionTowards(v1, v2) * \
-    [2.0 * dotProduct(vectorTowards(c0, v1), directionTowards(v1, v2))].map(lambda b: -0.5 * (b + sqrt(b * b - 4.0 * (dotProduct(vectorTowards(c0, v1), vectorTowards(c0, v1)) - r * r))))
+    [2 * dotProduct(vectorTowards(c0, v1), directionTowards(v1, v2))].map(lambda b: -0.5 * (b + sqrt(b * b - 4 * (dotProduct(vectorTowards(c0, v1), vectorTowards(c0, v1)) - r * r))))
 
 macro Array.insertAt(index, item):
     self.append(null)
