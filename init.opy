@@ -62,6 +62,17 @@ rule "After 3s if the checkpoints are empty then provide a warning":
 
 
 
+rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
+	@Condition not EditorOn
+	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
+    bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
+    wait(60)
+	bigMessage(getAllPlayers(), "   {0} Lobby is restarting now...".format(iconString(Icon.WARNING)))
+	wait(3)
+	restartMatch()
+
+
+
 macro fence_delay = 3 # decrease to make it wait more often if you have load problems, keep at full int numbers no floats
 macro fence_proj_size = 30 # projectile size, 30 is maximum possible atm
 macro fence_grid = 16 # gridsize of 16 means a 16x16 grid with the point in the center

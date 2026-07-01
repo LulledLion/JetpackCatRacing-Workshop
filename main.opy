@@ -34,6 +34,7 @@ divider(code)
 #!include "init.opy"
 #!include "huds.opy"
 #!include "racing.opy"
+#!include "commands.opy"
 
 divider(editor)
 #!include "editor.opy"

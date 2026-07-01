@@ -140,48 +140,10 @@ rule "Arrive at Checkpoint":
 
 
 
-rule "Reset - Single Checkpoint":
-    @Event eachPlayer
-	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
-
-    waitUntil(not eventPlayer.isHoldingButton(Button.RELOAD), 0.3)
-    if eventPlayer.isHoldingButton(Button.RELOAD):
-        return
-    if eventPlayer.CheckpointCurrentIdx:
-        GoToResetPoint()
-    else:
-        FullReset()
-
-
-
-rule "Reset - Full":
-    @Event eachPlayer
-	# @Condition not hostPlayer.WsEditorOn
-	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD)
-
-    wait(0.5, Wait.ABORT_WHEN_FALSE)
-    FullReset()
-
-
-
 rule "Handle Death":
     @Event playerDied
     eventPlayer.respawn()
     GoToResetPoint()
-
-
-
-rule "[Timer] After RestartLobbyTime minutes has passed, restart the lobby":
-	@Condition not EditorOn
-	@Condition getTotalTimeElapsed() > RestartLobbyTime * 60
-    bigMessage(getAllPlayers(), "   {0} Lobby is restarting in 1 minute...".format(iconString(Icon.WARNING)))
-    wait(60)
-	bigMessage(getAllPlayers(), "   {0} Lobby is restarting now...".format(iconString(Icon.WARNING)))
-	wait(3)
-	restartMatch()
 
 
 

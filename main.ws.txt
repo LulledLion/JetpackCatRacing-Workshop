@@ -354,6 +354,23 @@ rule ("After 3s if the checkpoints are empty then provide a warning") {
     }
 }
 
+rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.EditorOn == False;
+        Total Time Elapsed > Multiply(Global.RestartLobbyTime, 60);
+    }
+    actions {
+        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting in 1 minute...", Icon String(Warning)));
+        Wait(60, Ignore Condition);
+        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting now...", Icon String(Warning)));
+        Wait(3, Ignore Condition);
+        Restart Match;
+    }
+}
+
 rule ("Addon | Little Destructo - Fence Breaker") {
     event {
         Ongoing - Global;
@@ -625,6 +642,34 @@ rule ("Arrive at Checkpoint") {
     }
 }
 
+rule ("Handle Death") {
+    event {
+        Player Died;
+        All;
+        All;
+    }
+    actions {
+        Respawn(Event Player);
+        Call Subroutine(GoToResetPoint);
+    }
+}
+
+rule ("Anti Crash") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Server Load > 250;
+    }
+    actions {
+        Wait(True, Abort When False);
+        Small Message(All Players(All Teams), Custom String("anti-crash system activated"));
+        Set Slow Motion(10);
+        Wait Until(Compare(Server Load, <, 230), 999999999999);
+        Set Slow Motion(100);
+    }
+}
+
 rule ("Reset - Single Checkpoint") {
     event {
         Ongoing - Each Player;
@@ -660,51 +705,6 @@ rule ("Reset - Full") {
     actions {
         Wait(0.5, Abort When False);
         Call Subroutine(FullReset);
-    }
-}
-
-rule ("Handle Death") {
-    event {
-        Player Died;
-        All;
-        All;
-    }
-    actions {
-        Respawn(Event Player);
-        Call Subroutine(GoToResetPoint);
-    }
-}
-
-rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.EditorOn == False;
-        Total Time Elapsed > Multiply(Global.RestartLobbyTime, 60);
-    }
-    actions {
-        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting in 1 minute...", Icon String(Warning)));
-        Wait(60, Ignore Condition);
-        Big Message(All Players(All Teams), Custom String("   {0} Lobby is restarting now...", Icon String(Warning)));
-        Wait(3, Ignore Condition);
-        Restart Match;
-    }
-}
-
-rule ("Anti Crash") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Server Load > 250;
-    }
-    actions {
-        Wait(True, Abort When False);
-        Small Message(All Players(All Teams), Custom String("anti-crash system activated"));
-        Set Slow Motion(10);
-        Wait Until(Compare(Server Load, <, 230), 999999999999);
-        Set Slow Motion(100);
     }
 }
 
