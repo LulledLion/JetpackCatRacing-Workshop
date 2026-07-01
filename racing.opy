@@ -74,7 +74,7 @@ rule "Arrive at Checkpoint":
 
     playEffect(eventPlayer, DynamicEffect.BUFF_EXPLOSION_SOUND, Color.WHITE, eventPlayer.getEyePosition(), 100)
     
-    #$$ TODO Splits Logic Here
+    # Start Splits Logic
     eventPlayer.TimeSplit = getTotalTimeElapsed()
     eventPlayer.TimeSplit -= eventPlayer.TimeStart
     eventPlayer.TimeSplits[eventPlayer.CheckpointCurrentIdx] = eventPlayer.TimeSplit
@@ -83,11 +83,10 @@ rule "Arrive at Checkpoint":
         TagFG,
         "A0FFA0FF>" if eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx] > eventPlayer.TimeSplit else "FF0040FF>+",
         (eventPlayer.TimeSplit - eventPlayer.TimeSplitsPB[eventPlayer.CheckpointCurrentIdx]) if eventPlayer.TimePersonalBest else 0.001,
-        eventPlayer.TimeSplit
-    )
+        eventPlayer.TimeSplit)
     if eventPlayer.CheckpointCurrentIdx >= LiveSplitMaxLines:
         eventPlayer.TimeSplitString = eventPlayer.TimeSplitString.substring(eventPlayer.TimeSplitString.strIndex('>\n') + (1))
-    #$$ END Splits Logic Here
+    # End Splits Logic
 
     eventPlayer.CheckpointCurrentIdx += 1
     SetCheckpoints()

@@ -588,7 +588,7 @@ rule ("Arrive at Checkpoint") {
         "$$ TODO: Map adjustable actual speed percent"
         Set Move Speed(Event Player, (Event Player).Speed);
         Play Effect(Event Player, Buff Explosion Sound, Color(White), Eye Position(Event Player), 100);
-        "$$ TODO Splits Logic Here"
+        "Start Splits Logic"
         Set Player Variable(Event Player, TimeSplit, Total Time Elapsed);
         Modify Player Variable(Event Player, TimeSplit, Subtract, (Event Player).TimeStart);
         Set Player Variable At Index(Event Player, TimeSplits, (Event Player).CheckpointCurrentIdx, (Event Player).TimeSplit);
@@ -596,7 +596,7 @@ rule ("Arrive at Checkpoint") {
         If(Compare((Event Player).CheckpointCurrentIdx, >=, 10));
             Set Player Variable(Event Player, TimeSplitString, String Slice((Event Player).TimeSplitString, Add(Index Of String Char((Event Player).TimeSplitString, Custom String(">\n")), True), 999999999999));
         End;
-        "$$ END Splits Logic Here"
+        "End Splits Logic"
         Modify Player Variable(Event Player, CheckpointCurrentIdx, Add, True);
         Call Subroutine(SetCheckpoints);
         If(Compare(Count Of(Value In Array(Global.Checkpoints, (Event Player).CheckpointCurrentIdx)), ==, 2));
