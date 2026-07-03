@@ -2,7 +2,7 @@
 
 
 
-rule "Reset - Single Checkpoint":
+rule "Reset Single Checkpoint":
     @Event eachPlayer
 	# @Condition not hostPlayer.WsEditorOn
 	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF
@@ -18,7 +18,7 @@ rule "Reset - Single Checkpoint":
 
 
 
-rule "Reset - Full":
+rule "Reset Full":
     @Event eachPlayer
 	# @Condition not hostPlayer.WsEditorOn
 	@Condition eventPlayer.EditorCurrentMode == EEditorMode.OFF

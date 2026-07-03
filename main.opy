@@ -1,5 +1,6 @@
 #!optimizeForSize
 #!writeToOutputFile
+#!rulePrefixTemplate f"{$pathTitle.replace('_', ' ')} | {$rule}" if $rule and not $isDelimiter else $rule
 
 # warnings ###################
 #!suppressWarnings w_tags

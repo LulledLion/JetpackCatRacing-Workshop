@@ -46,7 +46,7 @@ rule "Editor | Enable Checkpoint Selection":
 		playEffect(hostPlayer, DynamicEffect.RING_EXPLOSION_SOUND, Color.WHITE, hostPlayer.getPosition(), 100)
 
 
-rule "Editor | Export Data":
+rule "Export Data":
     @Event global # Forces 'Variable Target' to be Global
     @Condition EditorOn
 	# @Condition hostPlayer.CurrentEditorMode == EEditorMode.OFF 
@@ -74,7 +74,7 @@ rule "Editor | Export Data":
 	playEffect(hostPlayer, DynamicEffect.BUFF_IMPACT_SOUND, Color.WHITE, hostPlayer.getPosition() if hostPlayer.EditorCurrentMode == EEditorMode.OFF else Checkpoints[hostPlayer.CheckpointCurrentIdx], 100)
 
 
-rule "Editor | Hide Export instruction":
+rule "Hide Export instruction":
     @Condition EditorOn
     @Condition hostPlayer.isHoldingButton(Button.MELEE)
 	@Condition hostPlayer.EditorShowingExportInstructions
@@ -86,7 +86,7 @@ rule "Editor | Hide Export instruction":
 
 
 
-rule "Editor | Select Checkpoint & Mode":
+rule "Select Checkpoint & Mode":
     @Event eachPlayer
     @Condition EditorOn
     @Condition eventPlayer == hostPlayer
@@ -125,7 +125,7 @@ rule "Editor | Select Checkpoint & Mode":
 
 
 
-rule "Editor | Enable Checkpoint Edit":
+rule "Enable Checkpoint Edit":
     @Event eachPlayer
     @Condition EditorOn
     @Condition eventPlayer == hostPlayer
@@ -156,7 +156,7 @@ rule "Editor | Enable Checkpoint Edit":
 
 
 
-rule "Editor | Start Editing Position":
+rule "Start Editing Position":
     @Condition EditorOn
     @Condition hostPlayer.EditorCurrentMode == EEditorMode.MOVE
 	@Condition hostPlayer.EditingActive
@@ -167,7 +167,7 @@ rule "Editor | Start Editing Position":
         wait(0)
 
 
-rule "Editor | Remove Checkpoint":
+rule "Remove Checkpoint":
     @Event eachPlayer
     @Condition EditorOn
     @Condition eventPlayer == hostPlayer
@@ -201,7 +201,7 @@ rule "Editor | Remove Checkpoint":
 
 
 
-rule "Editor | Insert Checkpoint (After Current Checkpoint)":
+rule "Insert Checkpoint (After Current Checkpoint)":
     @Event eachPlayer
     @Condition EditorOn
     @Condition eventPlayer == hostPlayer
@@ -225,7 +225,7 @@ rule "Editor | Insert Checkpoint (After Current Checkpoint)":
 	hostPlayer.EditorIsMovingCheckpoint = true
 
 
-rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to true so next melee button can be presssed":
+rule "When stopped pressing melee, set EditMeleeButtonPressed back to true so next melee button can be presssed":
     @Condition EditorOn
 	@Condition not hostPlayer.isHoldingButton(Button.MELEE)
 
@@ -234,7 +234,7 @@ rule "Editor | When stopped pressing melee, set EditMeleeButtonPressed back to t
 
 
 def StartEditorCamera():
-    @Name "Editor | Start Editor 3rd Person Camera"
+    @Name "SUB | Start Editor 3rd Person Camera"
     
     hostPlayer.setInvisibility(Invis.ALL)
     DisableAbilities()
@@ -249,7 +249,7 @@ def StartEditorCamera():
     
 
 def StartEditorCamera2():
-    @Name "Editor | Start Editor 3rd Person Camera | Checkpoint Movement"
+    @Name "SUB | Start Editor 3rd Person Camera | Checkpoint Movement"
 
     hostPlayer.startCamera(
         hostPlayer.EditCheckpointTemp - 6 * updateEveryFrame(hostPlayer.getFacingDirection()), 
@@ -258,14 +258,14 @@ def StartEditorCamera2():
     )
 
 def StopEditorCamera():
-    @Name "Editor | Stop Editor 3rd Person Camera"
+    @Name "SUB | Stop Editor 3rd Person Camera"
     hostPlayer.stopCamera()
     hostPlayer.setInvisibility(Invis.NONE)
     EnableAbilities()
 
 
 def DisableAbilities():
-    @Name "Editor | Disable Movement and Abilities"
+    @Name "SUB | Disable Movement and Abilities"
     hostPlayer.setJumpEnabled(false)
     hostPlayer.setCrouchEnabled(false)
     hostPlayer.setPrimaryFireEnabled(false)
@@ -276,7 +276,7 @@ def DisableAbilities():
     hostPlayer.setMoveSpeed(0)
 
 def EnableAbilities():
-    @Name "Editor | Enable Movement and Abilities"
+    @Name "SUB | Enable Movement and Abilities"
     hostPlayer.setJumpEnabled(true)
     hostPlayer.setCrouchEnabled(true)
     hostPlayer.setPrimaryFireEnabled(true)

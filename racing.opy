@@ -1,6 +1,7 @@
 #!mainFile "main.opy"
 
 def SetCheckpoints():
+    @Name "SUB | Set Checkpoints"
     eventPlayer.CheckpointCurrent = Checkpoints[eventPlayer.CheckpointCurrentIdx].last()
     eventPlayer.CheckpointGoal = Checkpoints[eventPlayer.CheckpointCurrentIdx + 1][0]
     eventPlayer.CheckpointAfterNext = Checkpoints[eventPlayer.CheckpointCurrentIdx + 2][0]
@@ -8,6 +9,7 @@ def SetCheckpoints():
 
 
 def GoToResetPoint(): # go to CurrentCheckpoint
+    @Name "SUB | Go To Last Reset Point"
     eventPlayer.ResetSpeed()
     if Racer.Hero == Hero.SHION:
         eventPlayer.setAbilityCooldown(Button.ABILITY_1, false)
@@ -29,6 +31,7 @@ def GoToResetPoint(): # go to CurrentCheckpoint
 
 
 def FullReset():
+    @Name "SUB | Full Restart"
     eventPlayer.CheckpointCurrentIdx = 0
     eventPlayer.TimeStart = 0
     eventPlayer.TimeStop = 0
