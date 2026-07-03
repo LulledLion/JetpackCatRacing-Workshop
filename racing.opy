@@ -144,6 +144,7 @@ rule "Arrive at Checkpoint":
 
 rule "Handle Death":
     @Event playerDied
+    @Condition eventPlayer.CommandSpectate == false
     eventPlayer.respawn()
     GoToResetPoint()
 

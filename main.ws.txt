@@ -90,28 +90,29 @@ variables {
         126: TestBotArray
         127: MapVectorArray
     player:
-        0: EditorExport
-        1: EditorCurrentMode
-        2: EditingActive
-        3: EditCheckpointEffect
-        4: EditCheckpointTemp
-        5: EditMeleeButtonPressed
-        6: EditorIsMovingCheckpoint
-        7: EditorShowingExportInstructions
-        8: CheckpointCurrentIdx
-        9: CheckpointCurrent
-        10: CheckpointGoal
-        11: CheckpointAfterNext
-        12: TimeStart
-        13: TimeStop
-        14: TimePersonalBest
-        15: TimeSplit
-        16: TimeSplits
-        17: TimeSplitsPB
-        18: TimeSplitString
-        19: PositionOld
-        20: PositionCurrent
-        21: Speed
+        0: CheckpointCurrentIdx
+        1: CheckpointCurrent
+        2: CheckpointGoal
+        3: CheckpointAfterNext
+        4: EditorExport
+        5: EditorCurrentMode
+        6: EditingActive
+        7: EditCheckpointEffect
+        8: EditCheckpointTemp
+        9: EditMeleeButtonPressed
+        10: EditorIsMovingCheckpoint
+        11: EditorShowingExportInstructions
+        12: CommandSpectate
+        13: TimeStart
+        14: TimeStop
+        15: TimePersonalBest
+        16: TimeSplit
+        17: TimeSplits
+        18: TimeSplitsPB
+        19: TimeSplitString
+        20: PositionOld
+        21: PositionCurrent
+        22: Speed
 }
 
 subroutines {
@@ -132,7 +133,7 @@ disabled rule ("----------------------------------------------------------------
     }
 }
 
-rule ("Customize Credits and Colors Here") {
+rule ("Customize | Customize Credits and Colors Here") {
     event {
         Ongoing - Global;
     }
@@ -278,7 +279,7 @@ disabled rule ("----------------------------------------------------------------
     }
 }
 
-rule ("Init Global") {
+rule ("Init | Init Global") {
     event {
         Ongoing - Global;
     }
@@ -307,7 +308,7 @@ rule ("Init Global") {
     }
 }
 
-rule ("Init Player") {
+rule ("Init | Init Player") {
     event {
         Player Joined Match;
         All;
@@ -322,6 +323,9 @@ rule ("Init Player") {
         Disable Game Mode In-World UI(Event Player);
         Disable Messages(Event Player);
         Disable Movement Collision With Players(Event Player);
+        Disable Built-In Game Mode Respawning(Event Player);
+        Enable Death Spectate All Players(Event Player);
+        Enable Death Spectate Target HUD(Event Player);
         "map variables need to load first"
         Wait Until(Compare(Total Time Elapsed, >, 0.528), 0.528);
         Wait Until(Has Spawned(Event Player), 999999999999);
@@ -330,7 +334,7 @@ rule ("Init Player") {
     }
 }
 
-rule ("Server Time Elapsed") {
+rule ("Init | Server Time Elapsed") {
     event {
         Ongoing - Global;
     }
@@ -341,7 +345,7 @@ rule ("Server Time Elapsed") {
     }
 }
 
-rule ("After 3s if the checkpoints are empty then provide a warning") {
+rule ("Init | After 3s if the checkpoints are empty then provide a warning") {
     event {
         Ongoing - Global;
     }
@@ -354,7 +358,7 @@ rule ("After 3s if the checkpoints are empty then provide a warning") {
     }
 }
 
-rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
+rule ("Init | [Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
     event {
         Ongoing - Global;
     }
@@ -371,7 +375,7 @@ rule ("[Timer] After RestartLobbyTime minutes has passed, restart the lobby") {
     }
 }
 
-rule ("Addon | Little Destructo - Fence Breaker") {
+rule ("Init | Addon | Little Destructo - Fence Breaker") {
     event {
         Ongoing - Global;
     }
@@ -405,7 +409,7 @@ rule ("Addon | Little Destructo - Fence Breaker") {
     }
 }
 
-rule ("HUD Setup") {
+rule ("Huds | HUD Setup") {
     event {
         Ongoing - Global;
     }
@@ -423,7 +427,7 @@ rule ("HUD Setup") {
     }
 }
 
-rule ("Remake Leaderboard HUD") {
+rule ("Huds | Remake Leaderboard HUD") {
     event {
         Ongoing - Global;
     }
@@ -458,7 +462,7 @@ rule ("Remake Leaderboard HUD") {
     }
 }
 
-rule ("Effects Setup") {
+rule ("Huds | Effects Setup") {
     event {
         Ongoing - Global;
     }
@@ -472,7 +476,7 @@ rule ("Effects Setup") {
     }
 }
 
-rule ("Editor HUD") {
+rule ("Huds | Editor HUD") {
     event {
         Ongoing - Global;
     }
@@ -501,7 +505,7 @@ rule ("Editor HUD") {
     }
 }
 
-rule ("Subroutine SetCheckpoints") {
+rule ("Racing | SUB | Set Checkpoints") {
     event {
         Subroutine;
         SetCheckpoints;
@@ -513,7 +517,7 @@ rule ("Subroutine SetCheckpoints") {
     }
 }
 
-rule ("Subroutine GoToResetPoint") {
+rule ("Racing | SUB | Go To Last Reset Point") {
     event {
         Subroutine;
         GoToResetPoint;
@@ -536,7 +540,7 @@ rule ("Subroutine GoToResetPoint") {
     }
 }
 
-rule ("Subroutine FullReset") {
+rule ("Racing | SUB | Full Restart") {
     event {
         Subroutine;
         FullReset;
@@ -555,7 +559,7 @@ rule ("Subroutine FullReset") {
     }
 }
 
-rule ("Save previous position") {
+rule ("Racing | Save previous position") {
     event {
         Player Joined Match;
         All;
@@ -569,7 +573,7 @@ rule ("Save previous position") {
     }
 }
 
-rule ("Arrive at Checkpoint") {
+rule ("Racing | Arrive at Checkpoint") {
     event {
         Ongoing - Each Player;
         All;
@@ -642,11 +646,14 @@ rule ("Arrive at Checkpoint") {
     }
 }
 
-rule ("Handle Death") {
+rule ("Racing | Handle Death") {
     event {
         Player Died;
         All;
         All;
+    }
+    conditions {
+        (Event Player).CommandSpectate == False;
     }
     actions {
         Respawn(Event Player);
@@ -654,7 +661,7 @@ rule ("Handle Death") {
     }
 }
 
-rule ("Anti Crash") {
+rule ("Racing | Anti Crash") {
     event {
         Ongoing - Global;
     }
@@ -670,7 +677,7 @@ rule ("Anti Crash") {
     }
 }
 
-rule ("Reset - Single Checkpoint") {
+rule ("Commands | Reset Single Checkpoint") {
     event {
         Ongoing - Each Player;
         All;
@@ -691,7 +698,7 @@ rule ("Reset - Single Checkpoint") {
     }
 }
 
-rule ("Reset - Full") {
+rule ("Commands | Reset Full") {
     event {
         Ongoing - Each Player;
         All;
@@ -708,13 +715,34 @@ rule ("Reset - Full") {
     }
 }
 
+rule ("Commands | Spectate") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Is Button Held(Event Player, Button(Interact)) == True;
+    }
+    actions {
+        Wait(0.5, Abort When False);
+        Set Player Variable(Event Player, CommandSpectate, Not((Event Player).CommandSpectate));
+        If((Event Player).CommandSpectate);
+            "eventPlayer.setDamageReceived(100)"
+            Kill(Event Player, Null);
+        Else;
+            Resurrect(Event Player);
+            Call Subroutine(GoToResetPoint);
+    }
+}
+
 disabled rule ("------------------------------------------------------------------------  editor ------------------------------------------------------------------------ ") {
     event {
         Ongoing - Global;
     }
 }
 
-rule ("Editor | Enable Checkpoint Selection") {
+rule ("Editor | Editor | Enable Checkpoint Selection") {
     event {
         Ongoing - Each Player;
         All;
@@ -993,7 +1021,7 @@ rule ("Editor | When stopped pressing melee, set EditMeleeButtonPressed back to 
     }
 }
 
-rule ("Editor | Start Editor 3rd Person Camera") {
+rule ("Editor | SUB | Start Editor 3rd Person Camera") {
     event {
         Subroutine;
         StartEditorCamera;
@@ -1005,7 +1033,7 @@ rule ("Editor | Start Editor 3rd Person Camera") {
     }
 }
 
-rule ("Editor | Start Editor 3rd Person Camera | Checkpoint Movement") {
+rule ("Editor | SUB | Start Editor 3rd Person Camera | Checkpoint Movement") {
     event {
         Subroutine;
         StartEditorCamera2;
@@ -1015,7 +1043,7 @@ rule ("Editor | Start Editor 3rd Person Camera | Checkpoint Movement") {
     }
 }
 
-rule ("Editor | Stop Editor 3rd Person Camera") {
+rule ("Editor | SUB | Stop Editor 3rd Person Camera") {
     event {
         Subroutine;
         StopEditorCamera;
@@ -1027,7 +1055,7 @@ rule ("Editor | Stop Editor 3rd Person Camera") {
     }
 }
 
-rule ("Editor | Disable Movement and Abilities") {
+rule ("Editor | SUB | Disable Movement and Abilities") {
     event {
         Subroutine;
         DisableAbilities;
@@ -1044,7 +1072,7 @@ rule ("Editor | Disable Movement and Abilities") {
     }
 }
 
-rule ("Editor | Enable Movement and Abilities") {
+rule ("Editor | SUB | Enable Movement and Abilities") {
     event {
         Subroutine;
         EnableAbilities;

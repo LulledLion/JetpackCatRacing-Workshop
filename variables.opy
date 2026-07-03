@@ -27,6 +27,11 @@ globalvar TestBotArray 126
 globalvar TagFG 125
 
 # Player variables
+playervar CheckpointCurrentIdx
+playervar CheckpointCurrent
+playervar CheckpointGoal
+playervar CheckpointAfterNext
+
 playervar EditorExport
 playervar EditorCurrentMode
 playervar EditingActive
@@ -36,10 +41,7 @@ playervar EditMeleeButtonPressed
 playervar EditorIsMovingCheckpoint
 playervar EditorShowingExportInstructions
 
-playervar CheckpointCurrentIdx
-playervar CheckpointCurrent
-playervar CheckpointGoal
-playervar CheckpointAfterNext
+playervar CommandSpectate
 
 playervar TimeStart
 playervar TimeStop
